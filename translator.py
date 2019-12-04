@@ -1,5 +1,4 @@
 from z3 import *
-
 verbose=False
 
 
