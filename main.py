@@ -2,6 +2,7 @@ import sys
 import sexp
 import pprint
 import translator
+import time
 
 
 def Extend(Stmts,Productions):
@@ -12,9 +13,11 @@ def Extend(Stmts,Productions):
             if len(TryExtend) > 0 :
                 for extended in TryExtend:
                     ret.append(Stmts[0:i]+[extended]+Stmts[i+1:])
-        elif Productions.has_key(Stmts[i]):
+        elif Stmts[i] in Productions:
             for extended in Productions[Stmts[i]]:
                 ret.append(Stmts[0:i]+[extended]+Stmts[i+1:])
+        if len(ret) > 0:
+            break
     return ret
 
 
@@ -27,6 +30,8 @@ def stripComments(bmFile):
 
 
 if __name__ == '__main__':
+    timeStart = time.time()
+
     benchmarkFile = open(sys.argv[1])
     bm = stripComments(benchmarkFile)
     bmExpr = sexp.sexp.parseString(bm, parseAll=True).asList()[0] #Parse string to python list
@@ -94,6 +99,8 @@ if __name__ == '__main__':
             if not TE_str in TE_set:
                 BfsQueue.append(TE)
                 TE_set.add(TE_str)
+
+    print(f'Time: {time.time() - timeStart}s', file=sys.stderr)
 
     print(Ans)
 
