@@ -1,7 +1,1 @@
-
-/sygusparser.y.cc
-/sygusparser.y.hh
-/sygusparser.l.cc
-/stack.hh
-/parser
-/*.o
+/build
