@@ -33,7 +33,7 @@ MINUS -
 "let" { return LET; }
 
 "set-logic" { return CMD_SET_LOGIC; }
-"define-sort" { return CMD_DEFINE_FUN; }
+"define-sort" { return CMD_DEFINE_SORT; }
 "declare-var" { return CMD_DECLARE_VAR; }
 "declare-fun" { return CMD_DECLARE_FUN; }
 "define-fun" { return CMD_DEFINE_FUN; }

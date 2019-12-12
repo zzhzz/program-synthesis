@@ -159,11 +159,11 @@ cmd_declare_fun
     ;
 
 cmd_define_fun
-    : LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
+    : LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB {}
     ;
 
 cmd_synth_fun
-    : LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
+    : LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB {}
     ;
 
 cmd_constraint
