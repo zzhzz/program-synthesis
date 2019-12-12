@@ -1,6 +1,6 @@
 
-parser: y.tab.c y.tab.h lex.yy.c
-	gcc -o parser y.tab.c lex.yy.c
+parser: y.tab.c y.tab.h lex.yy.c main.cpp
+	gcc -o parser y.tab.c lex.yy.c main.cpp
 
 y.tab.c y.tab.h: sygusparser.y
 	bison -d -y sygusparser.y
