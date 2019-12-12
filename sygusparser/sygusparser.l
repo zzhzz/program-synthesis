@@ -48,7 +48,7 @@ MINUS -
 "LocalVariable" { return EXP_LOCAL_VARIABLE; }
 
 {MINUS}?{DIGITAL}+ { return INT; }
-{QUOTE}{NONQUOTE}*{QUOTE} { printf("STRING %s\n", yytext); return STRING; }
+{QUOTE}{NONQUOTE}*{QUOTE} { return STRING; }
 {SYMBOLBEGIN}{SYMBOLDETAIL}* { return SYMBOL; }
 
 %%
