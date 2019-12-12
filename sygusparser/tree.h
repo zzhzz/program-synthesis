@@ -100,7 +100,7 @@ protected:
 
 public:
     let_term_item(const std::string &n, std::shared_ptr<sort> so, std::shared_ptr<term> te) : name(n), s(so), t(te) {}
-    const std::string get_name() const { return name; }
+    const std::string &get_name() const { return name; }
     std::shared_ptr<sort> get_sort() const { return s; }
     std::shared_ptr<term> get_term() const { return t; }
 };
@@ -265,7 +265,7 @@ protected:
 
 public:
     cmd_constraint(std::shared_ptr<term> te) : t(te) {}
-    std::shared_ptr<term> get_term() { return t; }
+    std::shared_ptr<term> get_term() const { return t; }
 };
 
 class cmd_check_synth : public cmd
@@ -286,8 +286,8 @@ protected:
 
 public:
     option(const std::string &n, const std::string &v) : name(n), value(v) {}
-    const std::string &get_name() { return name; }
-    const std::string &get_value() { return value; }
+    const std::string &get_name() const { return name; }
+    const std::string &get_value() const { return value; }
 };
 
 class cmd_set_options : public cmd
@@ -299,4 +299,15 @@ protected:
 public:
     cmd_set_options(const std::vector<std::shared_ptr<option>> &o) : options(o) {}
     const std::vector<std::shared_ptr<option>> &get_options() const { return options; }
+};
+
+class string_wrap : public object
+{
+protected:
+    virtual ~string_wrap() = default;
+    std::string s;
+
+public:
+    string_wrap(const std::string &str) : s(str) {}
+    const std::string &get() const { return s; }
 };

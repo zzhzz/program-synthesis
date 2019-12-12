@@ -1,10 +1,25 @@
+%skeleton "lalr1.cc" /* -*- C++ -*- */
+%require "3.0"
+%language "c++"
 
-%{
+%code requires
+{
 #include <stdio.h>
-extern char *yytext;
-extern int yylex (void);
-void yyerror(const char*);
-%}
+#include "tree.h"
+
+#include "sygusparser_lexer.hh"
+
+namespace sygusparser{
+    inline int yylex(int*, sygusparser::sygusparser_lexer &lexer) {
+        return lexer.get_next_token();
+    }
+}
+}
+
+%define api.namespace { sygusparser }
+%lex-param { sygusparser::sygusparser_lexer &lexer }
+%parse-param { sygusparser::sygusparser_lexer &lexer }
+
 
 %token LB RB
 %token BOOL_TRUE BOOL_FALSE
@@ -188,7 +203,7 @@ cmd_set_options
     ;
 
 %%
-
-void yyerror (char const *s) {
-    fprintf (stderr, "%s\n", s);
+inline void sygusparser::parser::error (const std::string& msg)
+{
+    throw std::runtime_error(msg);
 }
