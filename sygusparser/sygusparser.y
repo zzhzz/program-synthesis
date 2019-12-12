@@ -1,6 +1,9 @@
 
 %{
-
+#include <stdio.h>
+extern char *yytext;
+extern int yylex (void);
+void yyerror(const char*);
 %}
 
 %token LB RB
@@ -185,3 +188,13 @@ cmd_set_options
     ;
 
 %%
+
+void yyerror (char const *s) {
+    fprintf (stderr, "%s\n", s);
+}
+
+int main(int argc, char* argv[])
+{
+    yyparse();
+    return 0;
+}

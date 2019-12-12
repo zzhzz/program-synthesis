@@ -1,21 +1,28 @@
+%option noyywrap
 
-SYMBOLBEGIN [_\+\-\*&\|!~<>=/%\?\.\$\^a-zA-Z0-9]
-SYMBOLDETAIL [_\+\-\*&\|!~<>=/%\?\.\$\^a-zA-Z]
+SYMBOLBEGIN [_\+\-\*&\|!~<>=/%\?\.\$\^a-zA-Z]
+SYMBOLDETAIL [_\+\-\*&\|!~<>=/%\?\.\$\^a-zA-Z0-9]
 
 INTVAL [0-9]
 WHITESPACE [ \r\n\t]
 
-%{
+QUOTE \"
+NONQUOTE [^"]
 
+DIGITAL [0-9]
+MINUS -
+
+%{
+#include "y.tab.h"
 %}
 
 %%
 
-";.+" {}
-"{WHITESPACE}+" {}
+";".+ {}
+{WHITESPACE}+ {}
 
-"\(" { return LB; }
-"\)" { return RB; }
+"(" { return LB; }
+")" { return RB; }
 
 "true" { return BOOL_TRUE; }
 "false" { return BOOL_FALSE; }
@@ -40,11 +47,9 @@ WHITESPACE [ \r\n\t]
 "InputVariable" { return EXP_INPUT_VARIABLE; }
 "LocalVariable" { return EXP_LOCAL_VARIABLE; }
 
-"-?[0-9]" { return INT; }
-"\"[^\"]*\"" { return STRING; }
-
-"{SYMBOLBEGIN}{SYMBOLDETAIL}*" { return SYMBOL; }
-
+{MINUS}?{DIGITAL}+ { return INT; }
+{QUOTE}{NONQUOTE}*{QUOTE} { printf("STRING %s\n", yytext); return STRING; }
+{SYMBOLBEGIN}{SYMBOLDETAIL}* { return SYMBOL; }
 
 %%
 
