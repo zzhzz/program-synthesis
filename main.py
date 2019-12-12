@@ -1,6 +1,7 @@
 import sys
 import sexp
 import pprint
+import json
 import translator
 import time
 
@@ -42,12 +43,11 @@ if __name__ == '__main__':
     SynFunExpr = []
     StartSym = 'My-Start-Symbol' #virtual starting symbol
     for expr in bmExpr:
-        if len(expr)==0:
+        if len(expr) == 0:
             continue
-        elif expr[0]=='synth-fun':
-            SynFunExpr=expr
+        elif expr[0] == 'synth-fun':
+            SynFunExpr = expr
     FuncDefine = ['define-fun']+SynFunExpr[1:4] #copy function signature
-    #print(FuncDefine)
     BfsQueue = [[StartSym]] #Top-down
     Productions = {StartSym:[]}
     Type = {StartSym:SynFunExpr[3]} # set starting symbol's return type
@@ -69,23 +69,16 @@ if __name__ == '__main__':
     while(len(BfsQueue)!=0):
         Curr = BfsQueue.pop(0)
         #print("Extending "+str(Curr))
-        TryExtend = Extend(Curr,Productions)
+        TryExtend = Extend(Curr, Productions)
         if(len(TryExtend)==0): # Nothing to extend
-            FuncDefineStr = translator.toString(FuncDefine,ForceBracket = True) # use Force Bracket = True on function definition. MAGIC CODE. DO NOT MODIFY THE ARGUMENT ForceBracket = True.
+            FuncDefineStr = translator.toString(FuncDefine,ForceBracket=True) # use Force Bracket = True on function definition. MAGIC CODE. DO NOT MODIFY THE ARGUMENT ForceBracket = True.
             CurrStr = translator.toString(Curr)
-            #SynFunResult = FuncDefine+Curr
-            #Str = translator.toString(SynFunResult)
+            print('CurrStr ' + CurrStr)
             Str = FuncDefineStr[:-1]+' '+ CurrStr+FuncDefineStr[-1] # insert Program just before the last bracket ')'
+            print('Str ' + Str)
             Count += 1
-            # print (Count)
-            # print (Str)
-            # if Count % 100 == 1:
-                # print (Count)
-                # print (Str)
-                #raw_input()
-            #print '1'
             counterexample = checker.check(Str)
-            #print counterexample
+            print(counterexample)
             if(counterexample == None): # No counter-example
                 Ans = Str
                 break
@@ -101,7 +94,6 @@ if __name__ == '__main__':
                 TE_set.add(TE_str)
 
     print(f'Time: {time.time() - timeStart}s', file=sys.stderr)
-
     print(Ans)
 
 	# Examples of counter-examples    
