@@ -6,12 +6,11 @@
 {
 #include <stdio.h>
 #include "tree.h"
-
 #include "sygusparser_lexer.hh"
-#include "tree.h"
 
 namespace sygusparser{
-    inline int yylex(int*, sygusparser::sygusparser_lexer &lexer) {
+    inline int yylex(object**x, sygusparser::sygusparser_lexer &lexer) {
+        *x = nullptr;
         return lexer.get_next_token();
     }
 }
@@ -34,61 +33,66 @@ namespace sygusparser{
 %token EXP_CONSTANT EXP_VARIABLE EXP_INPUT_VARIABLE EXP_LOCAL_VARIABLE
 %token SYMBOL
 
-// %type sygus_problem std::shared_ptr<
+%define api.value.type {object*}
 
 %%
-
 sygus_problem
-    : cmd_set_logic cmd_list_non {}
+    : cmd_set_logic cmd_list_non { cmds.add_set_logic(to_shared(dynamic_cast<cmd_set_logic*>($1))); }
     | cmd_list_non {}
     ;
 
 cmd_list_non
-    : cmd {}
-    | cmd cmd_list_non {}
+    : cmd { cmds.add_cmd(to_shared(dynamic_cast<cmd*>($1))); }
+    | cmd cmd_list_non { cmds.add_cmd(to_shared(dynamic_cast<cmd*>($1))); }
     ;
 
 cmd
-    : cmd_define_sort {}
-    | cmd_declare_var {}
-    | cmd_declare_fun {}
-    | cmd_define_fun {}
-    | cmd_synth_fun {}
-    | cmd_constraint {}
-    | cmd_check_synth {}
-    | cmd_set_options {}
+    : cmd_define_sort { $$ = $1; }
+    | cmd_declare_var { $$ = $1; }
+    | cmd_declare_fun { $$ = $1; }
+    | cmd_define_fun { $$ = $1; }
+    | cmd_synth_fun { $$ = $1; }
+    | cmd_constraint { $$ = $1; }
+    | cmd_check_synth { $$ = $1; }
+    | cmd_set_options { $$ = $1; }
     ;
 
 symbol
-    : SYMBOL {}
+    : SYMBOL { $$ = new string_wrap(std::string(lexer.YYText())); }
     ;
 
 string
-    : STRING {}
+    : STRING { $$ = new string_wrap(std::string(lexer.YYText())); }
     ;
 
 literal
-    : INT {}
-    | BOOL_TRUE {}
-    | BOOL_FALSE {}
+    : INT { $$ = new term_literal(sort_element::sort_elements::Int, atol(lexer.YYText())); }
+    | BOOL_TRUE { $$ = new term_literal(sort_element::sort_elements::Bool, 1); }
+    | BOOL_FALSE { $$ = new term_literal(sort_element::sort_elements::Bool, 0); }
     ;
 
 sort_expr
-    : SORT_INT {}
-    | SORT_BOOL {}
-    | symbol {}
+    : SORT_INT { $$ = new sort_element(sort_element::sort_elements::Int); }
+    | SORT_BOOL { $$ = new sort_element(sort_element::sort_elements::Bool); }
+    | symbol { string_wrap* sw = &dynamic_cast<string_wrap&>(*$1); $$ = new sort_symbol(sw->get()); delete sw; }
     ;
 
 sort_expr_list
-    : {}
-    | sort_expr sort_expr_list {}
+    : { $$ = new list_wrap<sort>(); }
+    | sort_expr sort_expr_list { auto lw = &dynamic_cast<list_wrap<sort>&>(*$2); lw->add(to_shared_cast<sort>($1)); $$ = lw; }
     ;
 
 term
-    : LB symbol term_list RB {}
-    | literal {}
-    | symbol {}
-    | let_term {}
+    : LB symbol term_list RB {
+        string_wrap* sw = &dynamic_cast<string_wrap&>(*$1);
+        list_wrap<term>* lw = &dynamic_cast<list_wrap<term>&>(*$2);
+        $$ = new term_func(sw->get(), lw->get());
+        delete sw;
+        delete lw;
+    }
+    | literal { $$ = $1; }
+    | symbol { $$ = $1; }
+    | let_term { $$ = $1; }
     ;
 
 term_list

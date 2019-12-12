@@ -5,25 +5,44 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 class object
 {
+public:
+    virtual ~object() = default;
+
 protected:
     object() = default;
-    virtual ~object() = default;
 };
+
+template <typename T>
+inline std::shared_ptr<T> to_shared(T *v)
+{
+    return std::shared_ptr<T>(v);
+}
+
+template <typename T>
+inline std::shared_ptr<T> to_shared_cast(object *v)
+{
+    return std::shared_ptr<T>(&dynamic_cast<T &>(*v));
+}
 
 class sort : public object
 {
+public:
+    virtual ~sort() = default;
+
 protected:
     sort() = default;
-    virtual ~sort() = default;
 };
 
 class sort_symbol : public sort
 {
-protected:
+public:
     virtual ~sort_symbol() = default;
+
+protected:
     std::string sort_name;
 
 public:
@@ -40,8 +59,9 @@ public:
         Bool
     };
 
-protected:
     virtual ~sort_element() = default;
+
+protected:
     sort_elements sort_ele;
 
 public:
@@ -51,15 +71,19 @@ public:
 
 class term : public object
 {
+public:
+    virtual ~term() = default;
+
 protected:
     term() = default;
-    virtual ~term() = default;
 };
 
 class term_func : public term
 {
-protected:
+public:
     virtual ~term_func() = default;
+
+protected:
     std::string name;
     std::vector<std::shared_ptr<term>> terms;
 
@@ -71,8 +95,10 @@ public:
 
 class term_literal : public term
 {
-protected:
+public:
     virtual ~term_literal() = default;
+
+protected:
     sort_element::sort_elements sort;
     long val;
 
@@ -84,8 +110,10 @@ public:
 
 class term_symbol : public term
 {
-protected:
+public:
     virtual ~term_symbol() = default;
+
+protected:
     std::string sym;
 
 public:
@@ -95,11 +123,13 @@ public:
 
 class let_term_item : public object
 {
+public:
+    virtual ~let_term_item() = default;
+
 protected:
     std::string name;
     std::shared_ptr<sort> s;
     std::shared_ptr<term> t;
-    virtual ~let_term_item() = default;
 
 public:
     let_term_item(const std::string &n, std::shared_ptr<sort> so, std::shared_ptr<term> te) : name(n), s(so), t(te) {}
@@ -110,8 +140,10 @@ public:
 
 class term_let : public term
 {
-protected:
+public:
     virtual ~term_let() = default;
+
+protected:
     std::vector<std::shared_ptr<let_term_item>> let_items;
     std::shared_ptr<term> t;
 
@@ -132,8 +164,9 @@ public:
         LocalVariable
     };
 
-protected:
     virtual ~term_exp() = default;
+
+protected:
     term_exp_type t;
     std::shared_ptr<sort> s;
 
@@ -147,13 +180,17 @@ class cmd : public object
 {
 protected:
     cmd() = default;
+
+public:
     virtual ~cmd() = default;
 };
 
 class cmd_set_logic : public cmd
 {
-protected:
+public:
     virtual ~cmd_set_logic() = default;
+
+protected:
     std::string logic;
 
 public:
@@ -163,14 +200,25 @@ public:
 
 class cmd_define_sort : public cmd
 {
-protected:
+public:
     virtual ~cmd_define_sort() = default;
+
+protected:
+    std::string name;
+    std::shared_ptr<sort> value;
+
+public:
+    cmd_define_sort(const std::string &n, std::shared_ptr<sort> v) : name(n), value(v) {}
+    const std::string &get_name() const { return name; }
+    std::shared_ptr<sort> get_value() const { return value; }
 };
 
 class cmd_declare_var : public cmd
 {
-protected:
+public:
     virtual ~cmd_declare_var() = default;
+
+protected:
     std::string name;
     std::shared_ptr<sort> s;
 
@@ -182,8 +230,10 @@ public:
 
 class cmd_declare_fun : public cmd
 {
-protected:
+public:
     virtual ~cmd_declare_fun() = default;
+
+protected:
     std::string name;
     std::vector<std::shared_ptr<sort>> params;
     std::shared_ptr<sort> result;
@@ -198,8 +248,10 @@ public:
 
 class param : public object
 {
-protected:
+public:
     ~param() = default;
+
+protected:
     std::string name;
     std::shared_ptr<sort> s;
 
@@ -211,8 +263,10 @@ public:
 
 class cmd_define_fun : public cmd
 {
-protected:
+public:
     virtual ~cmd_define_fun() = default;
+
+protected:
     std::string name;
     std::vector<std::shared_ptr<param>> params;
     std::shared_ptr<sort> result;
@@ -229,8 +283,10 @@ public:
 
 class synth_rule : public object
 {
-protected:
+public:
     virtual ~synth_rule() = default;
+
+protected:
     std::string name;
     std::shared_ptr<sort> s;
     std::vector<std::shared_ptr<term>> rules;
@@ -244,8 +300,10 @@ public:
 
 class cmd_synth_fun : public cmd
 {
-protected:
+public:
     virtual ~cmd_synth_fun() = default;
+
+protected:
     std::string name;
     std::vector<std::shared_ptr<param>> params;
     std::shared_ptr<sort> result;
@@ -262,8 +320,10 @@ public:
 
 class cmd_constraint : public cmd
 {
-protected:
+public:
     virtual ~cmd_constraint() = default;
+
+protected:
     std::shared_ptr<term> t;
 
 public:
@@ -273,17 +333,18 @@ public:
 
 class cmd_check_synth : public cmd
 {
-protected:
+public:
     virtual ~cmd_check_synth() = default;
 
-public:
     cmd_check_synth() = default;
 };
 
 class option : public object
 {
-protected:
+public:
     virtual ~option() = default;
+
+protected:
     std::string name;
     std::string value;
 
@@ -295,8 +356,10 @@ public:
 
 class cmd_set_options : public cmd
 {
-protected:
+public:
     virtual ~cmd_set_options() = default;
+
+protected:
     std::vector<std::shared_ptr<option>> options;
 
 public:
@@ -306,8 +369,10 @@ public:
 
 class string_wrap : public object
 {
-protected:
+public:
     virtual ~string_wrap() = default;
+
+protected:
     std::string s;
 
 public:
@@ -315,18 +380,35 @@ public:
     const std::string &get() const { return s; }
 };
 
+template <typename T>
+class list_wrap : public object
+{
+public:
+    virtual ~list_wrap() = default;
+
+protected:
+    std::vector<std::shared_ptr<T>> list;
+
+public:
+    const std::vector<std::shared_ptr<T>> &get() const { return list; }
+    void add(std::shared_ptr<T> p) { list.emplace_back(p); }
+    void reverse() { std::reverse(list.begin(), list.end()); }
+    std::vector<std::shared_ptr<T>> get() {
+        return std::vector<std::shared_ptr<T>>(list.rbegin(), list.rend());
+    }
+};
 
 class sygus_command_list
 {
 public:
-    std::shared_ptr<cmd> setlogic;
+    std::shared_ptr<cmd_set_logic> setlogic;
     std::vector<std::shared_ptr<cmd>> cmds;
 
     inline void add_cmd(std::shared_ptr<cmd> cmd)
     {
         cmds.push_back(cmd);
     }
-    inline void add_set_logic(std::shared_ptr<cmd> cmd)
+    inline void add_set_logic(std::shared_ptr<cmd_set_logic> cmd)
     {
         setlogic = cmd;
     }
