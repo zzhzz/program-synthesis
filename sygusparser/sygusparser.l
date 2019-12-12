@@ -61,4 +61,5 @@ using std::cerr;
 {QUOTE}{NONQUOTE}*{QUOTE} { return sygusparser::parser::token::STRING; }
 {SYMBOLBEGIN}{SYMBOLDETAIL}* { return sygusparser::parser::token::SYMBOL; }
 
+. { throw std::runtime_error("unknown character"); }
 %%

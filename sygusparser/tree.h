@@ -1,4 +1,7 @@
 
+#ifndef tree_header
+#define tree_header
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -311,3 +314,22 @@ public:
     string_wrap(const std::string &str) : s(str) {}
     const std::string &get() const { return s; }
 };
+
+
+class sygus_command_list
+{
+public:
+    std::shared_ptr<cmd> setlogic;
+    std::vector<std::shared_ptr<cmd>> cmds;
+
+    inline void add_cmd(std::shared_ptr<cmd> cmd)
+    {
+        cmds.push_back(cmd);
+    }
+    inline void add_set_logic(std::shared_ptr<cmd> cmd)
+    {
+        setlogic = cmd;
+    }
+};
+
+#endif

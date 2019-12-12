@@ -8,6 +8,7 @@
 #include "tree.h"
 
 #include "sygusparser_lexer.hh"
+#include "tree.h"
 
 namespace sygusparser{
     inline int yylex(int*, sygusparser::sygusparser_lexer &lexer) {
@@ -19,6 +20,7 @@ namespace sygusparser{
 %define api.namespace { sygusparser }
 %lex-param { sygusparser::sygusparser_lexer &lexer }
 %parse-param { sygusparser::sygusparser_lexer &lexer }
+%parse-param { sygus_command_list &cmds }
 
 
 %token LB RB
@@ -31,6 +33,8 @@ namespace sygusparser{
 %token LET
 %token EXP_CONSTANT EXP_VARIABLE EXP_INPUT_VARIABLE EXP_LOCAL_VARIABLE
 %token SYMBOL
+
+// %type sygus_problem std::shared_ptr<
 
 %%
 
