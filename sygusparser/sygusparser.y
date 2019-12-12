@@ -79,7 +79,11 @@ sort_expr
 
 sort_expr_list
     : { $$ = new list_wrap<sort>(); }
-    | sort_expr sort_expr_list { auto lw = &dynamic_cast<list_wrap<sort>&>(*$2); lw->add(to_shared_cast<sort>($1)); $$ = lw; }
+    | sort_expr sort_expr_list {
+        auto lw = &dynamic_cast<list_wrap<sort>&>(*$2);
+        lw->add(to_shared_cast<sort>($1));
+        $$ = lw;
+    }
     ;
 
 term
@@ -96,17 +100,29 @@ term
     ;
 
 term_list
-    : {}
-    | term term_list {}
+    : { $$ = new list_wrap<term>(); }
+    | term term_list {
+        auto lw = &dynamic_cast<list_wrap<term>&>(*$2);
+        lw->add(to_shared_cast<term>($1));
+        $$ = lw;
+    }
     ;
 
 let_clause
-    : LB symbol sort_expr term RB {}
+    : LB symbol sort_expr term RB {
+        string_wrap* sw = &dynamic_cast<string_wrap&>(*$1);
+        $$ = new let_term_item(sw->get(), to_shared_cast<sort>($2), to_shared_cast<term>($3));
+        delete sw;
+    }
     ;
 
 let_clause_list_non
-    : let_clause {}
-    | let_clause let_clause_list_non {}
+    : let_clause { $$ = new list_wrap<let_term_item>(); }
+    | let_clause let_clause_list_non {
+        auto lw = &dynamic_cast<list_wrap<let_term_item>&>(*$2);
+        lw->add(to_shared_cast<let_term_item>($1));
+        $$ = lw;
+    }
     ;
 
 let_term
