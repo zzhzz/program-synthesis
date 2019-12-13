@@ -307,15 +307,15 @@ protected:
     std::string name;
     std::vector<std::shared_ptr<param>> params;
     std::shared_ptr<sort> result;
-    std::shared_ptr<synth_rule> body;
+    std::vector<std::shared_ptr<synth_rule>> body;
 
 public:
     cmd_synth_fun(const std::string &n, const std::vector<std::shared_ptr<param>> &p,
-                  std::shared_ptr<sort> r, std::shared_ptr<synth_rule> b) : name(n), params(p), result(r), body(b) {}
+                  std::shared_ptr<sort> r, std::vector<std::shared_ptr<synth_rule>> b) : name(n), params(p), result(r), body(b) {}
     const std::string &get_name() const { return name; }
     const std::vector<std::shared_ptr<param>> &get_params() const { return params; }
     std::shared_ptr<sort> get_result() const { return result; }
-    std::shared_ptr<synth_rule> get_body() const { return body; }
+    const std::vector<std::shared_ptr<synth_rule>> &get_body() const { return body; }
 };
 
 class cmd_constraint : public cmd
