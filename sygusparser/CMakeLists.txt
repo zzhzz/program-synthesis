@@ -11,8 +11,6 @@ bison_target(sygusparser sygusparser.y sygusparser.y.cc
 
 flex_target(sygusparser sygusparser.l ${CMAKE_BINARY_DIR}/sygusparser.l.cc)
 
-target_include_directories(sygusparser PRIVATE ${Z3_CXX_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-target_link_libraries(sygusparser PRIVATE ${Z3_LIBRARIES})
 
 add_executable(sygusparser
     ${BISON_sygusparser_OUTPUTS}
@@ -21,3 +19,6 @@ add_executable(sygusparser
     tree.h
     sygusparser_lexer.hh
     )
+
+target_include_directories(sygusparser PRIVATE ${Z3_CXX_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
+target_link_libraries(sygusparser PRIVATE ${Z3_LIBRARIES})

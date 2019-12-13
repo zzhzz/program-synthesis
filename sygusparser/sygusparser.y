@@ -5,8 +5,9 @@
 %code requires
 {
 #include <stdio.h>
-#include "tree.h"
 #include "sygusparser_lexer.hh"
+
+#include <z3++.h>
 
 namespace sygusparser{
     inline int yylex(object**x, sygusparser::sygusparser_lexer &lexer) {
@@ -33,7 +34,38 @@ namespace sygusparser{
 %token EXP_CONSTANT EXP_VARIABLE EXP_INPUT_VARIABLE EXP_LOCAL_VARIABLE
 %token SYMBOL
 
-%define api.value.type {object*}
+%union{
+    void *type_none;
+    z3::sort *type_sort;
+    z3::sort_vector *type_sort_vector;
+    z3::expr *type_expr;
+    z3::expr_vector *type_expr_vector;
+    string_wrap *type_str;
+}
+
+%type <type_none> sygus_problem cmd_list_non cmd cmd_define_sort cmd_declare_var cmd_declare_fun
+%type <type_none> cmd_define_fun cmd_synth_fun cmd_constraint cmd_check_synth cmd_set_options
+%type <type_str> symbol string
+%type <type_expr> literal term
+%type <type_expr_vector> term_list
+%type <type_sort> sort_expr
+%type <type_sort_vector> sort_expr_list
+
+
+let_clause
+let_clause_list_non
+let_term
+gterm
+gterm_list
+let_gclause
+let_gclause_list_non
+let_gterm
+param
+param_list
+gterm_list_non
+ntdef
+ntdef_list_non
+
 
 %%
 sygus_problem
