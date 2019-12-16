@@ -32,7 +32,7 @@ class SygusGraph:
         "link_local": [20],
         "super_and": [1],
         "nonterminal": [20],
-        "synth_rule": [20, 20],
+        "synth_rule": [20, 40],
         "ast_global": [20],
         "ast_func": [16],
         "ast_synth" : [1],
@@ -78,18 +78,18 @@ class SygusGraph:
             cur_count += m
 
         SygusGraph.INTERNAL_FUNCS_REVERSE = {
-            x: i for x, i in enumerate(SygusGraph.INTERNAL_FUNCS)
+            x: i for i, x in enumerate(SygusGraph.INTERNAL_FUNCS)
         }
         NODE_EMBEDDING_NUMS = cur_count
 
-    EDGE_TYPES = {"AST": 0, "ASTLINK": 1, "GEN": 2, "GENLINK": 3, "GENOUT": 4}
+    EDGE_TYPES = {"AST": 0, "ASTLINK": 1, "GEN": 2, "GENLINK": 3, "GENOUT": 4, "PARAMLINK": 5}
 
     def __init__(self):
         self.nodes = []
         self.edges = []
 
         self.non_terminal_count = iter(range(20))
-        self.non_terminal_gen_count = [iter(range(20)) for _ in range(20)]
+        self.non_terminal_gen_count = [iter(range(40)) for _ in range(20)]
         self.global_counter = iter(range(20))
         self.local_counter = iter(range(20))
 
@@ -101,7 +101,7 @@ class SygusGraph:
             "link_func",
             "link_literal_bool",
             "link_literal_int_small",
-            "lint_literal_int_large",
+            "link_literal_int_large",
             "link_local",
             "super_and",
         )
@@ -127,7 +127,7 @@ class SygusGraph:
         return node, r
 
     def add_gen_rule(self, non_terminal):
-        r = next(non_terminal_gen_count[non_terminal])
+        r = next(self.non_terminal_gen_count[non_terminal])
         node, _ = self.add_node(
             SygusGraph.NODE_EMBEDDING_ARRAY["synth_rule"][non_terminal, r]
         )
@@ -161,19 +161,19 @@ class SygusGraph:
 
     def add_ast_literal(self, val):
         if val is True:
-            node, _ = self.add_node(SygusGraph.NODE_EMBEDDING["ast_literal_bool"][1])
+            node, _ = self.add_node(SygusGraph.NODE_EMBEDDING_ARRAY["ast_literal_bool"][1])
         elif val is False:
-            node, _ = self.add_node(SygusGraph.NODE_EMBEDDING["ast_literal_bool"][0])
+            node, _ = self.add_node(SygusGraph.NODE_EMBEDDING_ARRAY["ast_literal_bool"][0])
         else:
             node, _ = self.add_node()
             if val >= -20 and val < 20:
                 self.set_node(
-                    node, SygusGraph.NODE_EMBEDDING["ast_literal_int_small"][val + 20]
+                    node, SygusGraph.NODE_EMBEDDING_ARRAY["ast_literal_int_small"][val + 20]
                 )
             else:
                 self.set_node(
                     node,
-                    SygusGraph.NODE_EMBEDDING["ast_literal_int_large"][
+                    SygusGraph.NODE_EMBEDDING_ARRAY["ast_literal_int_large"][
                         1 if val > 0 else 0
                     ],
                 )
@@ -183,7 +183,7 @@ class SygusGraph:
 
     def add_ast_global_ex(self, r):
         node, _ = self.add_node()
-        self.set_node(node, SygusGraph.NODE_EMBEDDING["ast_global"][r])
+        self.set_node(node, SygusGraph.NODE_EMBEDDING_ARRAY["ast_global"][r])
         return node, r
 
 
@@ -356,6 +356,8 @@ class SygusSolver:
                     self.graph.add_edge(node, child_node, "AST")
                 return node
             else:
+                print(list(SygusGraph.INTERNAL_FUNCS_REVERSE))
+                print(expr.name)
                 raise Exception("Unknown Name")
         elif expr.type == ExprType.Let:
             raise Exception("Let clause is not supported")
@@ -384,17 +386,17 @@ class SygusSolver:
 
     def check_synth(self):
         self.graph = graph = SygusGraph()
-        self.superand = superand = int(graph.NODE_EMBEDDING_ARRAY["superand"][0])
+        self.superand = superand = int(graph.NODE_EMBEDDING_ARRAY["super_and"][0])
 
-        self.global_mapping = {decl.name: i for i, decl in enumerate(self.decls)}
-        self.synth = synth = self.synths[0]
+        self.global_mapping = {decl.det.name: i for i, decl in enumerate(self.decls.values())}
+        self.synth = synth = next(iter(self.synths.values()))
         self.local_mapping = {x: i for i, x in enumerate(synth.params)}
-        self.synth_name = synth.name
+        self.synth_name = synth.det.name
         assert len(self.global_mapping) < 20
         assert len(self.local_mapping) < 20
 
         for con in self.constraints:
-            node_child = self.expr_to_graph(con.expr)
+            node_child = self.expr_to_graph(con)
             self.graph.add_edge(superand, node_child, "AST")
 
         self.rule_mapping = {}
