@@ -121,6 +121,9 @@ class FuncDet:
         self.name = name
         self.paramsorts = paramsorts
 
+    def to_tuple(self):
+        return (self.name,) + tuple(self.paramsorts)
+
     def __str__(self):
         return f"{self.name} ({' '.join(map(str, self.paramsorts))})"
 

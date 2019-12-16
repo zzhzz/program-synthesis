@@ -199,7 +199,7 @@ def p_term_2(p):
 
 def p_term_3(p):
     "term : symbol"
-    p[0] = p[1]
+    p[0] = Expr.build_func(p[1], ())
 
 
 def p_term_4(p):
@@ -249,7 +249,7 @@ def p_gterm_2(p):
 
 def p_gterm_3(p):
     "gterm : symbol"
-    p[0] = p[1]
+    p[0] = Expr.build_func(p[1], ())
 
 
 def p_gterm_4(p):
