@@ -151,7 +151,10 @@ class CmdDeclFun:
         self.sort = sort
 
     def __str__(self):
-        return f"(declare-fun {self.det} {self.sort})"
+        if len(self.det.paramsorts) == 0:
+            return f"(declare-const {self.det.name} {self.sort})"
+        else:
+            return f"(declare-fun {self.det} {self.sort})"
 
 
 class CmdDefFun:
