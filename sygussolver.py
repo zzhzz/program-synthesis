@@ -1,23 +1,8 @@
 from sygusparser import parser
-from sygustree import (
-    CmdCheckSynth,
-    CmdConstraint,
-    CmdDeclFun,
-    CmdDefFun,
-    CmdDefSort,
-    CmdSetLogic,
-    CmdSetOptions,
-    CmdSynthFun,
-    Expr,
-    ExprType,
-    FuncDet,
-    GenRule,
-    LetClause,
-    Option,
-    Sort,
-    SortValue,
-    SygusProblem,
-)
+from sygustree import (CmdCheckSynth, CmdConstraint, CmdDeclFun, CmdDefFun,
+                       CmdDefSort, CmdSetLogic, CmdSetOptions, CmdSynthFun,
+                       Expr, ExprType, FuncDet, GenRule, LetClause, Option,
+                       Sort, SortValue, SygusProblem)
 
 
 class SygusSolver:
@@ -58,7 +43,8 @@ class SygusSolver:
             self.internals[det.to_tuple()] = cmd
 
     def ensure_none(self, det):
-        if det in self.defines or det in self.decls or self.synths or det in self.internals:
+        det = det.to_tuple()
+        if det in self.defines or det in self.decls or det in self.synths or det in self.internals:
             raise Exception(f"Function '{det}' alerady exists.")
 
     def ensure_distinct(self, names):
@@ -207,7 +193,7 @@ class SygusSolver:
                             raise Exception(
                                 f"Synth func type mismatch: {det.name} {sort} {r.sort}"
                             )
-                self.defines[det.to_tuple()] = CmdSynthFun(det, params, sort, rules)
+                self.synths[det.to_tuple()] = CmdSynthFun(det, params, sort, rules)
             elif isinstance(cmd, CmdSetOptions):
                 pass
             elif isinstance(cmd, CmdDefSort):
@@ -223,4 +209,3 @@ class SygusSolver:
                 self.check_synth()
             else:
                 raise Exception(f"Unknown cmd type: {cmd}")
-
