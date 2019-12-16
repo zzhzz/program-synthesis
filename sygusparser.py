@@ -36,8 +36,6 @@ tokens = (
 )
 
 reserved = {
-    "(": "LB",
-    ")": "RB",
     "true": "BOOL_TRUE",
     "false": "BOOL_FALSE",
     "Int": "SORT_INT",
@@ -84,15 +82,15 @@ def t_STRING(t):
     return t
 
 
-def t_SYMBOL(t):
-    r"[_\+\-\*&\|!~<>=/%\?\.\$\^a-zA-Z][_\+\-\*&\|!~<>=/%\?\.\$\^a-zA-Z0-9]*"
-    t.type = reserved.get(t.value, "SYMBOL")
-    return t
-
-
 def t_INT(t):
     r"-?[0-9]+"
     t.value = int(t.value)
+    return t
+
+
+def t_SYMBOL(t):
+    r"[_\+\-\*&\|!~<>=/%\?\.\$\^a-zA-Z][_\+\-\*&\|!~<>=/%\?\.\$\^a-zA-Z0-9]*"
+    t.type = reserved.get(t.value, "SYMBOL")
     return t
 
 
