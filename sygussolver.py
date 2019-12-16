@@ -142,7 +142,12 @@ class SygusSolver:
         return FuncDet(det.name, tuple((self.lookup_sort(x) for x in det.paramsorts)))
 
     def check_synth(self):
-        pass
+        # TODO remove these limitation
+        assert len(self.defines) == 0
+        assert len(self.synths) == 1
+        for decl in self.decls.values():
+            assert len(decl.det.paramsorts) == 0
+        
 
     def push_locals(self, locals):
         self.local_envs.append(locals)
