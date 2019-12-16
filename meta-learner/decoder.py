@@ -43,10 +43,9 @@ class RecursiveDecoder(nn.Module):
 
         self.state = self.state_gru(act_emb, self.state)
 
-        prod_rule = 
 
 
-
+        return self.nll, value
 
 
     def choose_action(self, state, cls_w, use_random, eps):

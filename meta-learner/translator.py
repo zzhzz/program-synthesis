@@ -91,29 +91,27 @@ def ReadQuery(bmExpr):
             self.solver=Solver()
 
         def check(self,funcDefStr):
-            self.solver.push()
-            
-            
-            spec_smt2=[funcDefStr]
-            for constraint in Constraints:
+            counters = []
+            for idx, constraint in enumerate(Constraints):
+                self.solver.push()
+                spec_smt2 = [funcDefStr]
                 spec_smt2.append('(assert %s)'%(toString(constraint[1:])))
-            spec_smt2='\n'.join(spec_smt2)
-            #print spec_smt2
-            spec = parse_smt2_string(spec_smt2,decls=dict(self.VarTable))
-            spec = And(spec)
-            self.solver.add(Not(spec))
-            if verbose:
-                print("spec:",spec)
+                spec_smt2='\n'.join(spec_smt2)
+                #print spec_smt2
+                spec = parse_smt2_string(spec_smt2,decls=dict(self.VarTable))
+                spec = And(spec)
+                self.solver.add(Not(spec))
+                if verbose:
+                    print("spec:",spec)
 
-            res=self.solver.check()
-            if res==unsat:
-                self.solver.pop()
-                return None
-            else:
-                model=self.solver.model()
-                self.solver.pop()
-                
-                return model
+                res=self.solver.check()
+                if res==unsat:
+                    self.solver.pop()
+                else:
+                    model=self.solver.model()
+                    counters.append((idx, model))
+                    self.solver.pop()
+            return counters
     
     checker=Checker(VarTable, synFunction, Constraints)
     return checker
