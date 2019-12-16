@@ -329,6 +329,15 @@ def p_gterm_list_non_2(p):
     "gterm_list_non : gterm gterm_list_non "
     p[0] = (p[1],) + p[2]
 
+def p_term_list_non_1(p):
+    "term_list_non : term"
+    p[0] = (p[1],)
+
+
+def p_term_list_non_2(p):
+    "term_list_non : term term_list_non "
+    p[0] = (p[1],) + p[2]
+
 
 def p_ntdef(p):
     "ntdef : LB symbol sort_expr LB gterm_list_non RB RB"
@@ -385,6 +394,10 @@ def p_cmd_constraint(p):
     "cmd_constraint : LB CMD_CONSTRAINT term RB"
     p[0] = CmdConstraint(p[3])
 
+def p_cmd_constraint_add(p):
+    "cmd_constraint : LB CMD_CONSTRAINT symbol term_list_non RB"
+    func_expr = Expr.build_func(p[3], p[4])
+    p[0] = CmdConstraint(func_expr)
 
 def p_cmd_check_synth(p):
     "cmd_check_synth : LB CMD_CHECK_SYNTH RB"
