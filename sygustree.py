@@ -105,6 +105,17 @@ class Expr:
         else:
             return f"({self.type} {self.sort})"
 
+    def to_list(self):
+        if self.type == ExprType.Literal:
+            return self.value
+        if self.type == ExprType.Func:
+            if len(self.children) == 0:
+                return self.name
+            else:
+                return [self.name] + [c.to_list() for c in self.children]
+        if self.type == ExprType.Let:
+            return ["let", [[l.name, str(l.sort), l.expr.to_list()] for l in self.lets], self.children[0].to_list]
+
 class GenRule:
     def __init__(self, name, sort, exprs):
         self.name = name

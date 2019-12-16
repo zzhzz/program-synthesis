@@ -167,36 +167,45 @@ class SygusSolver:
         return FuncDet(det.name, tuple((self.lookup_sort(x) for x in det.paramsorts)))
 
     def expand_left(self, expr):
-        if expr.type == ExprType.Literal:
-            return None
-        elif expr.type == ExprType.Func:
-            if len(expr.children) == 0:
-                if expr.name in self.synth_rules:
-                    return self.synth_rules[expr.name]
-                else:
-                    return None
+        if isinstance(expr, str):
+            if expr in self.synth_rules:
+                return self.synth_rules[expr]
             else:
-                for i, child in enumerate(expr.children):
-                    results = self.expand_left(child)
-                    if results:
-                        newresults = []
-                        for result in results:
-                            newexpr = Expr.build_func(
-                                expr.name,
-                                expr.children[:i] + (result,) + expr.children[i + 1 :],
-                            )
-                            newexpr.sort = expr.sort
-                            newresults.append(newexpr)
-                        return newresults
                 return None
+        elif isinstance(expr, list):
+            for i, child in enumerate(expr):
+                if i == 0:
+                    continue
+                results = self.expand_left(child)
+                if results:
+                    newresults = [
+                        expr[:i] + [result] + expr[i + 1 :]
+                        for result in results
+                    ]
+                    return newresults
+            return None
+        else:
+            return None
+
+    def list_expr_to_string(self, expr):
+        if isinstance(expr, list):
+            return f"({' '.join(self.list_expr_to_string(e) for e in expr)})"
+        return str(expr)
+
+    def expr_to_define_cmd(self, expr):
+        name = self.synthcmd.det.name
+        params_sort = self.synthcmd.det.paramsorts
+        params_name = self.synthcmd.params
+        params_str = ' '.join([f"({n} {str(s)})" for s, n in zip(params_sort, params_name)])
+        return f"(define-fun {name} ({params_str}) {self.synthcmd.sort} {self.list_expr_to_string(expr)})"
 
     def check_valid(self, expr):
-        cmd_declears = [str(f) for f in self.decls.values()]
-        cmd_define_func = str(CmdDefFun(self.synthcmd.det, self.synthcmd.params, self.synthcmd.sort, expr))
-        cmd_constraint = self.constraint_combine.to_assert_str()
+        cmd_define_func = self.expr_to_define_cmd(expr)
         cmd_check = "(check-sat)"
-        all_cmds = cmd_declears + [cmd_define_func] + [cmd_constraint] + [cmd_check]
-        all_cmds = '\n'.join(all_cmds)
+        all_cmds = self.cmd_declears_str + [cmd_define_func] + [self.constraint_combine_str] + [cmd_check]
+        all_cmds = "\n".join(all_cmds)
+        # print(all_cmds)
+        # print()
         all_cmds = z3.parse_smt2_string(all_cmds)
         solver = z3.Solver()
         if solver.check(all_cmds) == z3.unsat:
@@ -212,21 +221,23 @@ class SygusSolver:
             assert len(decl.det.paramsorts) == 0
 
         self.synthcmd = synthcmd = next(iter(self.synths.values()))
-        self.synth_rules = {rule.name: rule.exprs for rule in synthcmd.rules}
+        self.synth_rules = {rule.name: [expr.to_list() for expr in rule.exprs] for rule in synthcmd.rules}
 
         constraint_combine = None
         for constraint in self.constraints:
             if constraint_combine is None:
                 constraint_combine = constraint
             else:
-                constraint_combine = Expr.build_func("and", (constraint_combine, constraint))
+                constraint_combine = Expr.build_func(
+                    "and", (constraint_combine, constraint)
+                )
         constraint_combine = Expr.build_func("not", (constraint_combine,))
         self.constraint_combine = CmdConstraint(constraint_combine)
+        self.constraint_combine_str = self.constraint_combine.to_assert_str()
+        self.cmd_declears_str = [str(f) for f in self.decls.values()]
 
         expand_queue = deque()
-        begin_expr = Expr.build_func("Start", ())
-        begin_expr.sort = synthcmd.sort
-        expand_queue.append(begin_expr)
+        expand_queue.append("Start")
 
         while len(expand_queue) > 0:
             cur_expr = expand_queue.popleft()
