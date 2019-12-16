@@ -18,6 +18,12 @@ class SortValue(Enum):
     Int = 0
     Bool = 1
 
+    def __str__(self):
+        if self == SortValue.Int:
+            return "Int"
+        if self == SortValue.Bool:
+            return "Bool"
+
 
 class LetClause:
     def __init__(self, name, sort, expr):
@@ -134,7 +140,7 @@ class CmdDeclFun:
         self.sort = sort
 
     def __str__(self):
-        return f"(declear-fun {self.det} {self.sort})"
+        return f"(declare-fun {self.det} {self.sort})"
 
 
 class CmdDefFun:
@@ -145,8 +151,11 @@ class CmdDefFun:
         self.expr = expr
 
     def __str__(self):
-        return f"(define-fun {self.det} ({' '.join(self.params)}) {self.sort} {self.expr})"
-
+        name = self.det.name
+        params_sort = self.det.paramsorts
+        params_name = self.params
+        params_str = ' '.join([f"({n} {str(s)})" for s, n in zip(params_sort, params_name)])
+        return f"(define-fun {name} ({params_str}) {self.sort} {self.expr})"
 
 class CmdSynthFun:
     def __init__(self, det, params, sort, rules):
@@ -156,7 +165,11 @@ class CmdSynthFun:
         self.rules = rules
 
     def __str__(self):
-        return f"(synth-fun {self.det} ({' '.join(self.params)}) {self.sort} ({' '.join(map(str, self.rules))}))"
+        name = self.det.name
+        params_sort = self.det.paramsorts
+        params_name = self.params
+        params_str = ' '.join([f"({n} {str(s)})" for s, n in zip(params_sort, params_name)])
+        return f"(synth-fun {name} ({params_str}) {self.sort} ({' '.join(map(str, self.rules))}))"
 
 class CmdSetOptions:
     def __init__(self, options):
@@ -178,6 +191,9 @@ class CmdDefSort:
 class CmdConstraint:
     def __init__(self, constraint):
         self.constraint = constraint
+
+    def to_assert_str(self):
+        return f"(assert {self.constraint})"
 
     def __str__(self):
         return f"(constraint {self.constraint})"

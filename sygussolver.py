@@ -1,8 +1,28 @@
 from sygusparser import parser
-from sygustree import (CmdCheckSynth, CmdConstraint, CmdDeclFun, CmdDefFun,
-                       CmdDefSort, CmdSetLogic, CmdSetOptions, CmdSynthFun,
-                       Expr, ExprType, FuncDet, GenRule, LetClause, Option,
-                       Sort, SortValue, SygusProblem)
+from sygustree import (
+    CmdCheckSynth,
+    CmdConstraint,
+    CmdDeclFun,
+    CmdDefFun,
+    CmdDefSort,
+    CmdSetLogic,
+    CmdSetOptions,
+    CmdSynthFun,
+    Expr,
+    ExprType,
+    FuncDet,
+    GenRule,
+    LetClause,
+    Option,
+    Sort,
+    SortValue,
+    SygusProblem,
+)
+
+import z3
+import time
+
+from collections import deque
 
 
 class SygusSolver:
@@ -44,7 +64,12 @@ class SygusSolver:
 
     def ensure_none(self, det):
         det = det.to_tuple()
-        if det in self.defines or det in self.decls or det in self.synths or det in self.internals:
+        if (
+            det in self.defines
+            or det in self.decls
+            or det in self.synths
+            or det in self.internals
+        ):
             raise Exception(f"Function '{det}' alerady exists.")
 
     def ensure_distinct(self, names):
@@ -141,13 +166,79 @@ class SygusSolver:
     def lookup_det(self, det):
         return FuncDet(det.name, tuple((self.lookup_sort(x) for x in det.paramsorts)))
 
+    def expand_left(self, expr):
+        if expr.type == ExprType.Literal:
+            return None
+        elif expr.type == ExprType.Func:
+            if len(expr.children) == 0:
+                if expr.name in self.synth_rules:
+                    return self.synth_rules[expr.name]
+                else:
+                    return None
+            else:
+                for i, child in enumerate(expr.children):
+                    results = self.expand_left(child)
+                    if results:
+                        newresults = []
+                        for result in results:
+                            newexpr = Expr.build_func(
+                                expr.name,
+                                expr.children[:i] + (result,) + expr.children[i + 1 :],
+                            )
+                            newexpr.sort = expr.sort
+                            newresults.append(newexpr)
+                        return newresults
+                return None
+
+    def check_valid(self, expr):
+        cmd_declears = [str(f) for f in self.decls.values()]
+        cmd_define_func = str(CmdDefFun(self.synthcmd.det, self.synthcmd.params, self.synthcmd.sort, expr))
+        cmd_constraint = self.constraint_combine.to_assert_str()
+        cmd_check = "(check-sat)"
+        all_cmds = cmd_declears + [cmd_define_func] + [cmd_constraint] + [cmd_check]
+        all_cmds = '\n'.join(all_cmds)
+        f = open('a.smt', 'w')
+        f.write(all_cmds)
+        f.close()
+        all_cmds = z3.parse_smt2_string(all_cmds)
+        solver = z3.Solver()
+        if solver.check(all_cmds) == z3.unsat:
+            print(cmd_define_func)
+            return True
+        return False
+
     def check_synth(self):
         # TODO remove these limitation
         assert len(self.defines) == 0
         assert len(self.synths) == 1
         for decl in self.decls.values():
             assert len(decl.det.paramsorts) == 0
-        
+
+        self.synthcmd = synthcmd = next(iter(self.synths.values()))
+        self.synth_rules = {rule.name: rule.exprs for rule in synthcmd.rules}
+
+        constraint_combine = None
+        for constraint in self.constraints:
+            if constraint_combine is None:
+                constraint_combine = constraint
+            else:
+                constraint_combine = Expr.build_func("and", (constraint_combine, constraint))
+        constraint_combine = Expr.build_func("not", (constraint_combine,))
+        self.constraint_combine = CmdConstraint(constraint_combine)
+
+        expand_queue = deque()
+        begin_expr = Expr.build_func("Start", ())
+        begin_expr.sort = synthcmd.sort
+        expand_queue.append(begin_expr)
+
+        while len(expand_queue) > 0:
+            cur_expr = expand_queue.popleft()
+            cur_exprs = self.expand_left(cur_expr)
+            if cur_exprs is None:
+                if self.check_valid(cur_expr):
+                    return True
+            else:
+                expand_queue.extend(cur_exprs)
 
     def push_locals(self, locals):
         self.local_envs.append(locals)
