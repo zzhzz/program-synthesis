@@ -403,11 +403,14 @@ class SygusSolver:
         for rule in synth.rules:
             node_root, id_root = self.graph.add_non_terminal()
             self.rule_mapping[rule.name] = node_root, id_root
+        self.graph.rule_mapping = {}
         for rule in synth.rules:
+            node_root, id_root = self.rule_mapping[rule.name]
+            self.graph.rule_mapping[rule.name] = (node_root, [])
             for expr in rule.exprs:
-                node_root, id_root = self.rule_mapping[rule.name]
                 node_child, _ = self.graph.add_gen_rule(id_root)
                 self.graph.add_edge(node_root, node_child, "GEN")
+                self.graph.rule_mapping[rule.name][1].append(node_child)
 
     def push_locals(self, locals):
         self.local_envs.append(locals)
