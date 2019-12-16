@@ -197,9 +197,6 @@ class SygusSolver:
         cmd_check = "(check-sat)"
         all_cmds = cmd_declears + [cmd_define_func] + [cmd_constraint] + [cmd_check]
         all_cmds = '\n'.join(all_cmds)
-        f = open('a.smt', 'w')
-        f.write(all_cmds)
-        f.close()
         all_cmds = z3.parse_smt2_string(all_cmds)
         solver = z3.Solver()
         if solver.check(all_cmds) == z3.unsat:
