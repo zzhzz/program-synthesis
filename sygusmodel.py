@@ -4,7 +4,8 @@ import time
 import os
 import h5py
 
-os.environ['CUDA_VISIBLE_DEVICES'] = ""
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 
 def scaled_dot_product_attention(q, k, v, mask):
     """Calculate the attention weights.
@@ -121,7 +122,6 @@ class EncoderLayer(tf.keras.layers.Layer):
         self.dropout2 = tf.keras.layers.Dropout(rate)
 
     def call(self, x, training, mask):
-
         attn_output, _ = self.mha(x, x, x, mask)  # (batch_size, input_seq_len, d_model)
         attn_output = self.dropout1(attn_output, training=training)
         out1 = self.layernorm1(x + attn_output)  # (batch_size, input_seq_len, d_model)
@@ -196,16 +196,16 @@ class Model(tf.keras.Model):
         )
 
     def __call__(self, x, idxnon, pos, training, mask, mask_cross):
-        x = self.encoder(x, training)
+        x = self.encoder(x, training, mask)
         gen = x[:, :2500]  # (b, 2500, model)
         gen = tf.reshape(gen, [-1, 5, 50, 10, self.d_model])  # (b, 5, 50, 10, model)
         gen = tf.gather(
             gen, tf.expand_dims(idxnon, -1), batch_dims=1
         )  # (b, 1, 50, 10, model)
         gen = tf.squeeze(gen, axis=1)  # (b, 50, 10, model)
-        gen = tf.max(gen, axis=2)  # (b, 50, model)
+        gen = tf.reduce_max(gen, axis=2)  # (b, 50, model)
 
-        non = x[6500:]  # (b, 1000, model)
+        non = x[:, 6500:]  # (b, 1000, model)
         non = tf.gather(non, tf.expand_dims(pos, -1), batch_dims=1)  # (b, 1, model)
 
         cross = tf.math.reduce_sum(gen * non, axis=-1)
@@ -218,11 +218,12 @@ model = Model()
 optimizer = tf.keras.optimizers.Adam()
 
 loss_object = tf.keras.losses.CategoricalCrossentropy(
-    from_logits=True, reduction="none"
+    from_logits=True, reduction=tf.keras.losses.Reduction.NONE
 )
 
 
 def loss_function(real, pred):
+    real = tf.one_hot(real, 50, dtype=tf.float32)
     loss_ = loss_object(real, pred)
     return tf.reduce_mean(loss_)
 
@@ -242,23 +243,33 @@ if ckpt_manager.latest_checkpoint:
 EPOCHS = 1000
 
 
-def create_masks(x):
-    return x, x
+def create_masks(x, idxnon):
+    mask1 = tf.cast(x == 0, tf.float32)
+    mask1 = mask1[:, tf.newaxis, tf.newaxis, :]
+    mask2 = x[:, :2500]
+    mask2 = tf.reshape(mask2, [-1, 5, 50, 10])  # (b, 5, 50, 10)
+    mask2 = tf.gather(mask2, tf.expand_dims(idxnon, -1), batch_dims=1)  # (b, 1, 50, 10)
+    mask2 = tf.squeeze(mask2, axis=1)  # (b, 50, 10)
+    mask2 = mask2[:, :, 0]  # (b, 50)
+    mask_del = tf.cast(mask2 == 0, tf.float32)
+    return mask1, mask_del
 
+BUFFER_SIZE = 20000
+BATCH_SIZE = 1
 
 @tf.function(
     input_signature=[
-        tf.TensorSpec(shape=(None, 7500), dtype=tf.int32),
-        tf.TensorSpec(shape=(None), dtype=tf.int32),
-        tf.TensorSpec(shape=(None), dtype=tf.int32),
-        tf.TensorSpec(shape=(None), dtype=tf.int32),
+        tf.TensorSpec(shape=(BATCH_SIZE, 7500), dtype=tf.int32),
+        tf.TensorSpec(shape=(BATCH_SIZE), dtype=tf.int32),
+        tf.TensorSpec(shape=(BATCH_SIZE), dtype=tf.int32),
+        tf.TensorSpec(shape=(BATCH_SIZE), dtype=tf.int32),
     ]
 )
 def train_step(x, idxnon, pos, idxrule):
-    mask, mask_cross = create_masks(x)
+    mask1, mask_del = create_masks(x, idxnon)
 
     with tf.GradientTape() as tape:
-        predictions, _ = model(x, idxnon, pos, True, mask, mask_cross)
+        predictions = model(x, idxnon, pos, True, mask1, mask_del)
         loss = loss_function(idxrule, predictions)
 
     gradients = tape.gradient(loss, model.trainable_variables)
@@ -267,9 +278,6 @@ def train_step(x, idxnon, pos, idxrule):
     train_loss(loss)
     train_accuracy(idxrule, predictions)
 
-
-BUFFER_SIZE = 20000
-BATCH_SIZE = 32
 
 traindata = h5py.File("train.h5", "r")
 traindata = (
