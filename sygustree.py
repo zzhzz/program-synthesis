@@ -107,14 +107,26 @@ class Expr:
 
     def to_list(self):
         if self.type == ExprType.Literal:
-            return self.value
+            if self.value is True:
+                return [ "true" ]
+            if self.value is False:
+                return [ "false" ]
+            return [ str(self.value) ]
         if self.type == ExprType.Func:
             if len(self.children) == 0:
-                return self.name
+                return [self.name]
             else:
-                return [self.name] + [c.to_list() for c in self.children]
+                result = ["(", self.name]
+                for c in self.children:
+                    result = result + c.to_list()
+                result = result + [")"]
+                return result
         if self.type == ExprType.Let:
-            return ["let", [[l.name, str(l.sort), l.expr.to_list()] for l in self.lets], self.children[0].to_list]
+            result = ["(", "let", "("]
+            for l in self.lets:
+                result = result + ["(", l.name, str(l.sort)] + l.expr.to_list() + [")"]
+            result = result + [")"] + self.children[0].to_list() + [")"]
+            return result
 
 class GenRule:
     def __init__(self, name, sort, exprs):
