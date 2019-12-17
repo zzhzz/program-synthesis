@@ -25,6 +25,8 @@ import time
 from itertools import count
 from collections import deque, defaultdict
 
+import sygusmap
+import sygusdata
 
 class SygusSolver:
 
@@ -276,8 +278,18 @@ class SygusSolver:
                 if expandfirst is None:
                     return [expr[:i] + result + expr[i + 1 :] for result in results]
                 else:
+                    for j, result in enumerate(results):
+                        if expandfirst in result:
+                            k = -1
+                            for a, (s, _) in enumerate(self.list_synths):
+                                if s == child:
+                                    k = a
+                                    break
+                            assert k != -1
+                            if len(expr) < 1000:
+                                sygusdata.write((self.list_synths, self.list_constraints, expr, i, k, j))
+                            return [expr[:i] + result + expr[i + 1 :]]
                     newresults = [expr[:i] + result + expr[i + 1 :] for result in results if expandfirst in result]
-                    # print(newresults)
                     assert len(newresults) == 1
                     return newresults or [expr[:i] + result + expr[i + 1 :] for result in results]
 
@@ -307,20 +319,21 @@ class SygusSolver:
         return f"(define-fun {name} ({params_str}) {self.synthcmd.sort} {self.list_expr_to_string(expr)})"
 
     def check_valid(self, expr):
-        cmd_define_func = self.expr_to_define_cmd(expr)
-        cmd_check = "(check-sat)"
-        all_cmds = (
-            self.cmd_declears_str
-            + [cmd_define_func]
-            + [self.constraint_combine_str]
-            + [cmd_check]
-        )
-        all_cmds = "\n".join(all_cmds)
+        # cmd_define_func = self.expr_to_define_cmd(expr)
+        # cmd_check = "(check-sat)"
+        # all_cmds = (
+        #     self.cmd_declears_str
+        #     + [cmd_define_func]
+        #     + [self.constraint_combine_str]
+        #     + [cmd_check]
+        # )
+        # all_cmds = "\n".join(all_cmds)
         # print(all_cmds)
         # print()
-        all_cmds = z3.parse_smt2_string(all_cmds)
-        solver = z3.Solver()
-        if solver.check(all_cmds) == z3.unsat:
+        # all_cmds = z3.parse_smt2_string(all_cmds)
+        # solver = z3.Solver()
+        # if solver.check(all_cmds) == z3.unsat:
+        if True:
             print(self.expr_to_define_cmd(expr, True))
             return True
         return False
@@ -338,8 +351,15 @@ class SygusSolver:
             for rule in synthcmd.rules
         }
 
+        self.list_synths = []
+        self.list_constraints = []
+
+        for rule in synthcmd.rules:
+            self.list_synths.append((rule.name, [sygusmap.apply_to_list(expr.to_list()) for expr in rule.exprs]))
+
         constraint_combine = None
         for constraint in self.constraints:
+            self.list_constraints.append(sygusmap.apply_to_list((constraint.to_list())))
             if constraint_combine is None:
                 constraint_combine = constraint
             else:
