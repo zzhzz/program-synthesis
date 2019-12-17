@@ -54,43 +54,46 @@ Rule 48    param_list -> <empty>
 Rule 49    param_list -> param param_list
 Rule 50    gterm_list_non -> gterm
 Rule 51    gterm_list_non -> gterm gterm_list_non
-Rule 52    ntdef -> LB symbol sort_expr LB gterm_list_non RB RB
-Rule 53    ntdef_list_non -> ntdef
-Rule 54    ntdef_list_non -> ntdef ntdef_list_non
-Rule 55    cmd_set_logic -> LB CMD_SET_LOGIC symbol RB
-Rule 56    cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr RB
-Rule 57    cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr RB
-Rule 58    cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
-Rule 59    cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
-Rule 60    cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
-Rule 61    cmd_constraint -> LB CMD_CONSTRAINT term RB
-Rule 62    cmd_check_synth -> LB CMD_CHECK_SYNTH RB
-Rule 63    option -> LB symbol string RB
-Rule 64    option_list_non -> option
-Rule 65    option_list_non -> option option_list_non
-Rule 66    cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB RB
+Rule 52    term_list_non -> term
+Rule 53    term_list_non -> term term_list_non
+Rule 54    ntdef -> LB symbol sort_expr LB gterm_list_non RB RB
+Rule 55    ntdef_list_non -> ntdef
+Rule 56    ntdef_list_non -> ntdef ntdef_list_non
+Rule 57    cmd_set_logic -> LB CMD_SET_LOGIC symbol RB
+Rule 58    cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr RB
+Rule 59    cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr RB
+Rule 60    cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
+Rule 61    cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
+Rule 62    cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
+Rule 63    cmd_constraint -> LB CMD_CONSTRAINT term RB
+Rule 64    cmd_constraint -> LB CMD_CONSTRAINT symbol term_list_non RB
+Rule 65    cmd_check_synth -> LB CMD_CHECK_SYNTH RB
+Rule 66    option -> LB symbol string RB
+Rule 67    option_list_non -> option
+Rule 68    option_list_non -> option option_list_non
+Rule 69    cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB RB
 
 Terminals, with rules where they appear
 
 BOOL_FALSE           : 17
 BOOL_TRUE            : 16
-CMD_CHECK_SYNTH      : 62
-CMD_CONSTRAINT       : 61
-CMD_DECLARE_FUN      : 58
-CMD_DECLARE_VAR      : 57
-CMD_DEFINE_FUN       : 59
-CMD_DEFINE_SORT      : 56
-CMD_SET_LOGIC        : 55
-CMD_SET_OPTIONS      : 66
-CMD_SYNTH_FUN        : 60
+CMD_CHECK_SYNTH      : 65
+CMD_CONSTRAINT       : 63 64
+CMD_DECLARE_FUN      : 60
+CMD_DECLARE_VAR      : 59
+CMD_DEFINE_FUN       : 61
+CMD_DEFINE_SORT      : 58
+CMD_SET_LOGIC        : 57
+CMD_SET_OPTIONS      : 69
+CMD_SYNTH_FUN        : 62
 EXP_CONSTANT         : 37
 EXP_INPUT_VARIABLE   : 39
 EXP_LOCAL_VARIABLE   : 40
 EXP_VARIABLE         : 38
 INT                  : 15
-LB                   : 23 29 32 32 33 37 38 39 40 43 46 46 47 52 52 55 56 57 58 58 59 59 60 60 60 61 62 63 66 66
+LB                   : 23 29 32 32 33 37 38 39 40 43 46 46 47 54 54 57 58 59 60 60 61 61 62 62 62 63 64 65 66 69 69
 LET                  : 32 46
-RB                   : 23 29 32 32 33 37 38 39 40 43 46 46 47 52 52 55 56 57 58 58 59 59 60 60 60 61 62 63 66 66
+RB                   : 23 29 32 32 33 37 38 39 40 43 46 46 47 54 54 57 58 59 60 60 61 61 62 62 62 63 64 65 66 69 69
 SORT_BOOL            : 19
 SORT_INT             : 18
 STRING               : 14
@@ -112,7 +115,7 @@ cmd_set_options      : 12
 cmd_synth_fun        : 9
 gterm                : 42 43 46 50 51
 gterm_list           : 33 42
-gterm_list_non       : 51 52
+gterm_list_non       : 51 54
 let_clause           : 30 31
 let_clause_list_non  : 31 32
 let_gclause          : 44 45
@@ -120,19 +123,20 @@ let_gclause_list_non : 45 46
 let_gterm            : 36
 let_term             : 26
 literal              : 24 34
-ntdef                : 53 54
-ntdef_list_non       : 54 60
-option               : 64 65
-option_list_non      : 65 66
+ntdef                : 55 56
+ntdef_list_non       : 56 62
+option               : 67 68
+option_list_non      : 68 69
 param                : 49
-param_list           : 49 59 60
-sort_expr            : 22 29 37 38 39 40 43 47 52 56 57 58 59 60
-sort_expr_list       : 22 58
-string               : 63
+param_list           : 49 61 62
+sort_expr            : 22 29 37 38 39 40 43 47 54 58 59 60 61 62
+sort_expr_list       : 22 60
+string               : 66
 sygus_problem        : 0
-symbol               : 20 23 25 29 33 35 43 47 52 55 56 57 58 59 60 63
-term                 : 28 29 32 59 61
+symbol               : 20 23 25 29 33 35 43 47 54 57 58 59 60 61 62 64 66
+term                 : 28 29 32 52 53 61 63
 term_list            : 23 28
+term_list_non        : 53 64
 
 Parsing method: LALR
 
@@ -141,7 +145,7 @@ state 0
     (0) S' -> . sygus_problem
     (1) sygus_problem -> . cmd_set_logic cmd_list_non
     (2) sygus_problem -> . cmd_list_non
-    (55) cmd_set_logic -> . LB CMD_SET_LOGIC symbol RB
+    (57) cmd_set_logic -> . LB CMD_SET_LOGIC symbol RB
     (3) cmd_list_non -> . cmd
     (4) cmd_list_non -> . cmd cmd_list_non
     (5) cmd -> . cmd_define_sort
@@ -152,14 +156,15 @@ state 0
     (10) cmd -> . cmd_constraint
     (11) cmd -> . cmd_check_synth
     (12) cmd -> . cmd_set_options
-    (56) cmd_define_sort -> . LB CMD_DEFINE_SORT symbol sort_expr RB
-    (57) cmd_declare_var -> . LB CMD_DECLARE_VAR symbol sort_expr RB
-    (58) cmd_declare_fun -> . LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
-    (59) cmd_define_fun -> . LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
-    (60) cmd_synth_fun -> . LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
-    (61) cmd_constraint -> . LB CMD_CONSTRAINT term RB
-    (62) cmd_check_synth -> . LB CMD_CHECK_SYNTH RB
-    (66) cmd_set_options -> . LB CMD_SET_OPTIONS LB option_list_non RB RB
+    (58) cmd_define_sort -> . LB CMD_DEFINE_SORT symbol sort_expr RB
+    (59) cmd_declare_var -> . LB CMD_DECLARE_VAR symbol sort_expr RB
+    (60) cmd_declare_fun -> . LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
+    (61) cmd_define_fun -> . LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
+    (62) cmd_synth_fun -> . LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
+    (63) cmd_constraint -> . LB CMD_CONSTRAINT term RB
+    (64) cmd_constraint -> . LB CMD_CONSTRAINT symbol term_list_non RB
+    (65) cmd_check_synth -> . LB CMD_CHECK_SYNTH RB
+    (69) cmd_set_options -> . LB CMD_SET_OPTIONS LB option_list_non RB RB
 
     LB              shift and go to state 4
 
@@ -195,14 +200,15 @@ state 2
     (10) cmd -> . cmd_constraint
     (11) cmd -> . cmd_check_synth
     (12) cmd -> . cmd_set_options
-    (56) cmd_define_sort -> . LB CMD_DEFINE_SORT symbol sort_expr RB
-    (57) cmd_declare_var -> . LB CMD_DECLARE_VAR symbol sort_expr RB
-    (58) cmd_declare_fun -> . LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
-    (59) cmd_define_fun -> . LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
-    (60) cmd_synth_fun -> . LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
-    (61) cmd_constraint -> . LB CMD_CONSTRAINT term RB
-    (62) cmd_check_synth -> . LB CMD_CHECK_SYNTH RB
-    (66) cmd_set_options -> . LB CMD_SET_OPTIONS LB option_list_non RB RB
+    (58) cmd_define_sort -> . LB CMD_DEFINE_SORT symbol sort_expr RB
+    (59) cmd_declare_var -> . LB CMD_DECLARE_VAR symbol sort_expr RB
+    (60) cmd_declare_fun -> . LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
+    (61) cmd_define_fun -> . LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
+    (62) cmd_synth_fun -> . LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
+    (63) cmd_constraint -> . LB CMD_CONSTRAINT term RB
+    (64) cmd_constraint -> . LB CMD_CONSTRAINT symbol term_list_non RB
+    (65) cmd_check_synth -> . LB CMD_CHECK_SYNTH RB
+    (69) cmd_set_options -> . LB CMD_SET_OPTIONS LB option_list_non RB RB
 
     LB              shift and go to state 15
 
@@ -226,15 +232,16 @@ state 3
 
 state 4
 
-    (55) cmd_set_logic -> LB . CMD_SET_LOGIC symbol RB
-    (56) cmd_define_sort -> LB . CMD_DEFINE_SORT symbol sort_expr RB
-    (57) cmd_declare_var -> LB . CMD_DECLARE_VAR symbol sort_expr RB
-    (58) cmd_declare_fun -> LB . CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
-    (59) cmd_define_fun -> LB . CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
-    (60) cmd_synth_fun -> LB . CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
-    (61) cmd_constraint -> LB . CMD_CONSTRAINT term RB
-    (62) cmd_check_synth -> LB . CMD_CHECK_SYNTH RB
-    (66) cmd_set_options -> LB . CMD_SET_OPTIONS LB option_list_non RB RB
+    (57) cmd_set_logic -> LB . CMD_SET_LOGIC symbol RB
+    (58) cmd_define_sort -> LB . CMD_DEFINE_SORT symbol sort_expr RB
+    (59) cmd_declare_var -> LB . CMD_DECLARE_VAR symbol sort_expr RB
+    (60) cmd_declare_fun -> LB . CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
+    (61) cmd_define_fun -> LB . CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
+    (62) cmd_synth_fun -> LB . CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
+    (63) cmd_constraint -> LB . CMD_CONSTRAINT term RB
+    (64) cmd_constraint -> LB . CMD_CONSTRAINT symbol term_list_non RB
+    (65) cmd_check_synth -> LB . CMD_CHECK_SYNTH RB
+    (69) cmd_set_options -> LB . CMD_SET_OPTIONS LB option_list_non RB RB
 
     CMD_SET_LOGIC   shift and go to state 16
     CMD_DEFINE_SORT shift and go to state 17
@@ -261,14 +268,15 @@ state 5
     (10) cmd -> . cmd_constraint
     (11) cmd -> . cmd_check_synth
     (12) cmd -> . cmd_set_options
-    (56) cmd_define_sort -> . LB CMD_DEFINE_SORT symbol sort_expr RB
-    (57) cmd_declare_var -> . LB CMD_DECLARE_VAR symbol sort_expr RB
-    (58) cmd_declare_fun -> . LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
-    (59) cmd_define_fun -> . LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
-    (60) cmd_synth_fun -> . LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
-    (61) cmd_constraint -> . LB CMD_CONSTRAINT term RB
-    (62) cmd_check_synth -> . LB CMD_CHECK_SYNTH RB
-    (66) cmd_set_options -> . LB CMD_SET_OPTIONS LB option_list_non RB RB
+    (58) cmd_define_sort -> . LB CMD_DEFINE_SORT symbol sort_expr RB
+    (59) cmd_declare_var -> . LB CMD_DECLARE_VAR symbol sort_expr RB
+    (60) cmd_declare_fun -> . LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
+    (61) cmd_define_fun -> . LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
+    (62) cmd_synth_fun -> . LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
+    (63) cmd_constraint -> . LB CMD_CONSTRAINT term RB
+    (64) cmd_constraint -> . LB CMD_CONSTRAINT symbol term_list_non RB
+    (65) cmd_check_synth -> . LB CMD_CHECK_SYNTH RB
+    (69) cmd_set_options -> . LB CMD_SET_OPTIONS LB option_list_non RB RB
 
     $end            reduce using rule 3 (cmd_list_non -> cmd .)
     LB              shift and go to state 15
@@ -357,14 +365,15 @@ state 14
 
 state 15
 
-    (56) cmd_define_sort -> LB . CMD_DEFINE_SORT symbol sort_expr RB
-    (57) cmd_declare_var -> LB . CMD_DECLARE_VAR symbol sort_expr RB
-    (58) cmd_declare_fun -> LB . CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
-    (59) cmd_define_fun -> LB . CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
-    (60) cmd_synth_fun -> LB . CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
-    (61) cmd_constraint -> LB . CMD_CONSTRAINT term RB
-    (62) cmd_check_synth -> LB . CMD_CHECK_SYNTH RB
-    (66) cmd_set_options -> LB . CMD_SET_OPTIONS LB option_list_non RB RB
+    (58) cmd_define_sort -> LB . CMD_DEFINE_SORT symbol sort_expr RB
+    (59) cmd_declare_var -> LB . CMD_DECLARE_VAR symbol sort_expr RB
+    (60) cmd_declare_fun -> LB . CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB
+    (61) cmd_define_fun -> LB . CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB
+    (62) cmd_synth_fun -> LB . CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
+    (63) cmd_constraint -> LB . CMD_CONSTRAINT term RB
+    (64) cmd_constraint -> LB . CMD_CONSTRAINT symbol term_list_non RB
+    (65) cmd_check_synth -> LB . CMD_CHECK_SYNTH RB
+    (69) cmd_set_options -> LB . CMD_SET_OPTIONS LB option_list_non RB RB
 
     CMD_DEFINE_SORT shift and go to state 17
     CMD_DECLARE_VAR shift and go to state 18
@@ -378,7 +387,7 @@ state 15
 
 state 16
 
-    (55) cmd_set_logic -> LB CMD_SET_LOGIC . symbol RB
+    (57) cmd_set_logic -> LB CMD_SET_LOGIC . symbol RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
@@ -387,7 +396,7 @@ state 16
 
 state 17
 
-    (56) cmd_define_sort -> LB CMD_DEFINE_SORT . symbol sort_expr RB
+    (58) cmd_define_sort -> LB CMD_DEFINE_SORT . symbol sort_expr RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
@@ -396,7 +405,7 @@ state 17
 
 state 18
 
-    (57) cmd_declare_var -> LB CMD_DECLARE_VAR . symbol sort_expr RB
+    (59) cmd_declare_var -> LB CMD_DECLARE_VAR . symbol sort_expr RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
@@ -405,7 +414,7 @@ state 18
 
 state 19
 
-    (58) cmd_declare_fun -> LB CMD_DECLARE_FUN . symbol LB sort_expr_list RB sort_expr RB
+    (60) cmd_declare_fun -> LB CMD_DECLARE_FUN . symbol LB sort_expr_list RB sort_expr RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
@@ -414,7 +423,7 @@ state 19
 
 state 20
 
-    (59) cmd_define_fun -> LB CMD_DEFINE_FUN . symbol LB param_list RB sort_expr term RB
+    (61) cmd_define_fun -> LB CMD_DEFINE_FUN . symbol LB param_list RB sort_expr term RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
@@ -423,7 +432,7 @@ state 20
 
 state 21
 
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN . symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN . symbol LB param_list RB sort_expr LB ntdef_list_non RB RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
@@ -432,22 +441,23 @@ state 21
 
 state 22
 
-    (61) cmd_constraint -> LB CMD_CONSTRAINT . term RB
+    (63) cmd_constraint -> LB CMD_CONSTRAINT . term RB
+    (64) cmd_constraint -> LB CMD_CONSTRAINT . symbol term_list_non RB
     (23) term -> . LB symbol term_list RB
     (24) term -> . literal
     (25) term -> . symbol
     (26) term -> . let_term
+    (13) symbol -> . SYMBOL
     (15) literal -> . INT
     (16) literal -> . BOOL_TRUE
     (17) literal -> . BOOL_FALSE
-    (13) symbol -> . SYMBOL
     (32) let_term -> . LB LET LB let_clause_list_non RB term RB
 
     LB              shift and go to state 33
+    SYMBOL          shift and go to state 27
     INT             shift and go to state 38
     BOOL_TRUE       shift and go to state 39
     BOOL_FALSE      shift and go to state 40
-    SYMBOL          shift and go to state 27
 
     term                           shift and go to state 34
     symbol                         shift and go to state 35
@@ -456,14 +466,14 @@ state 22
 
 state 23
 
-    (62) cmd_check_synth -> LB CMD_CHECK_SYNTH . RB
+    (65) cmd_check_synth -> LB CMD_CHECK_SYNTH . RB
 
     RB              shift and go to state 41
 
 
 state 24
 
-    (66) cmd_set_options -> LB CMD_SET_OPTIONS . LB option_list_non RB RB
+    (69) cmd_set_options -> LB CMD_SET_OPTIONS . LB option_list_non RB RB
 
     LB              shift and go to state 42
 
@@ -477,7 +487,7 @@ state 25
 
 state 26
 
-    (55) cmd_set_logic -> LB CMD_SET_LOGIC symbol . RB
+    (57) cmd_set_logic -> LB CMD_SET_LOGIC symbol . RB
 
     RB              shift and go to state 43
 
@@ -499,7 +509,7 @@ state 27
 
 state 28
 
-    (56) cmd_define_sort -> LB CMD_DEFINE_SORT symbol . sort_expr RB
+    (58) cmd_define_sort -> LB CMD_DEFINE_SORT symbol . sort_expr RB
     (18) sort_expr -> . SORT_INT
     (19) sort_expr -> . SORT_BOOL
     (20) sort_expr -> . symbol
@@ -514,7 +524,7 @@ state 28
 
 state 29
 
-    (57) cmd_declare_var -> LB CMD_DECLARE_VAR symbol . sort_expr RB
+    (59) cmd_declare_var -> LB CMD_DECLARE_VAR symbol . sort_expr RB
     (18) sort_expr -> . SORT_INT
     (19) sort_expr -> . SORT_BOOL
     (20) sort_expr -> . symbol
@@ -529,21 +539,21 @@ state 29
 
 state 30
 
-    (58) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol . LB sort_expr_list RB sort_expr RB
+    (60) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol . LB sort_expr_list RB sort_expr RB
 
     LB              shift and go to state 49
 
 
 state 31
 
-    (59) cmd_define_fun -> LB CMD_DEFINE_FUN symbol . LB param_list RB sort_expr term RB
+    (61) cmd_define_fun -> LB CMD_DEFINE_FUN symbol . LB param_list RB sort_expr term RB
 
     LB              shift and go to state 50
 
 
 state 32
 
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol . LB param_list RB sort_expr LB ntdef_list_non RB RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol . LB param_list RB sort_expr LB ntdef_list_non RB RB
 
     LB              shift and go to state 51
 
@@ -561,22 +571,39 @@ state 33
 
 state 34
 
-    (61) cmd_constraint -> LB CMD_CONSTRAINT term . RB
+    (63) cmd_constraint -> LB CMD_CONSTRAINT term . RB
 
     RB              shift and go to state 54
 
 
 state 35
 
+    (64) cmd_constraint -> LB CMD_CONSTRAINT symbol . term_list_non RB
     (25) term -> symbol .
+    (52) term_list_non -> . term
+    (53) term_list_non -> . term term_list_non
+    (23) term -> . LB symbol term_list RB
+    (24) term -> . literal
+    (25) term -> . symbol
+    (26) term -> . let_term
+    (15) literal -> . INT
+    (16) literal -> . BOOL_TRUE
+    (17) literal -> . BOOL_FALSE
+    (13) symbol -> . SYMBOL
+    (32) let_term -> . LB LET LB let_clause_list_non RB term RB
 
     RB              reduce using rule 25 (term -> symbol .)
-    LB              reduce using rule 25 (term -> symbol .)
-    INT             reduce using rule 25 (term -> symbol .)
-    BOOL_TRUE       reduce using rule 25 (term -> symbol .)
-    BOOL_FALSE      reduce using rule 25 (term -> symbol .)
-    SYMBOL          reduce using rule 25 (term -> symbol .)
+    LB              shift and go to state 33
+    INT             shift and go to state 38
+    BOOL_TRUE       shift and go to state 39
+    BOOL_FALSE      shift and go to state 40
+    SYMBOL          shift and go to state 27
 
+    symbol                         shift and go to state 55
+    term_list_non                  shift and go to state 56
+    term                           shift and go to state 57
+    literal                        shift and go to state 36
+    let_term                       shift and go to state 37
 
 state 36
 
@@ -640,29 +667,29 @@ state 40
 
 state 41
 
-    (62) cmd_check_synth -> LB CMD_CHECK_SYNTH RB .
+    (65) cmd_check_synth -> LB CMD_CHECK_SYNTH RB .
 
-    LB              reduce using rule 62 (cmd_check_synth -> LB CMD_CHECK_SYNTH RB .)
-    $end            reduce using rule 62 (cmd_check_synth -> LB CMD_CHECK_SYNTH RB .)
+    LB              reduce using rule 65 (cmd_check_synth -> LB CMD_CHECK_SYNTH RB .)
+    $end            reduce using rule 65 (cmd_check_synth -> LB CMD_CHECK_SYNTH RB .)
 
 
 state 42
 
-    (66) cmd_set_options -> LB CMD_SET_OPTIONS LB . option_list_non RB RB
-    (64) option_list_non -> . option
-    (65) option_list_non -> . option option_list_non
-    (63) option -> . LB symbol string RB
+    (69) cmd_set_options -> LB CMD_SET_OPTIONS LB . option_list_non RB RB
+    (67) option_list_non -> . option
+    (68) option_list_non -> . option option_list_non
+    (66) option -> . LB symbol string RB
 
-    LB              shift and go to state 55
+    LB              shift and go to state 58
 
-    option_list_non                shift and go to state 56
-    option                         shift and go to state 57
+    option_list_non                shift and go to state 59
+    option                         shift and go to state 60
 
 state 43
 
-    (55) cmd_set_logic -> LB CMD_SET_LOGIC symbol RB .
+    (57) cmd_set_logic -> LB CMD_SET_LOGIC symbol RB .
 
-    LB              reduce using rule 55 (cmd_set_logic -> LB CMD_SET_LOGIC symbol RB .)
+    LB              reduce using rule 57 (cmd_set_logic -> LB CMD_SET_LOGIC symbol RB .)
 
 
 state 44
@@ -681,9 +708,9 @@ state 44
 
 state 45
 
-    (56) cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr . RB
+    (58) cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr . RB
 
-    RB              shift and go to state 58
+    RB              shift and go to state 61
 
 
 state 46
@@ -716,14 +743,14 @@ state 47
 
 state 48
 
-    (57) cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr . RB
+    (59) cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr . RB
 
-    RB              shift and go to state 59
+    RB              shift and go to state 62
 
 
 state 49
 
-    (58) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB . sort_expr_list RB sort_expr RB
+    (60) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB . sort_expr_list RB sort_expr RB
     (21) sort_expr_list -> .
     (22) sort_expr_list -> . sort_expr sort_expr_list
     (18) sort_expr -> . SORT_INT
@@ -737,34 +764,34 @@ state 49
     SYMBOL          shift and go to state 27
 
     symbol                         shift and go to state 44
-    sort_expr_list                 shift and go to state 60
-    sort_expr                      shift and go to state 61
+    sort_expr_list                 shift and go to state 63
+    sort_expr                      shift and go to state 64
 
 state 50
 
-    (59) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB . param_list RB sort_expr term RB
+    (61) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB . param_list RB sort_expr term RB
     (48) param_list -> .
     (49) param_list -> . param param_list
     (47) param -> . LB symbol sort_expr RB
 
     RB              reduce using rule 48 (param_list -> .)
-    LB              shift and go to state 62
+    LB              shift and go to state 65
 
-    param_list                     shift and go to state 63
-    param                          shift and go to state 64
+    param_list                     shift and go to state 66
+    param                          shift and go to state 67
 
 state 51
 
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB . param_list RB sort_expr LB ntdef_list_non RB RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB . param_list RB sort_expr LB ntdef_list_non RB RB
     (48) param_list -> .
     (49) param_list -> . param param_list
     (47) param -> . LB symbol sort_expr RB
 
     RB              reduce using rule 48 (param_list -> .)
-    LB              shift and go to state 62
+    LB              shift and go to state 65
 
-    param_list                     shift and go to state 65
-    param                          shift and go to state 64
+    param_list                     shift and go to state 68
+    param                          shift and go to state 67
 
 state 52
 
@@ -788,9 +815,9 @@ state 52
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 35
-    term_list                      shift and go to state 66
-    term                           shift and go to state 67
+    symbol                         shift and go to state 55
+    term_list                      shift and go to state 69
+    term                           shift and go to state 70
     literal                        shift and go to state 36
     let_term                       shift and go to state 37
 
@@ -798,71 +825,119 @@ state 53
 
     (32) let_term -> LB LET . LB let_clause_list_non RB term RB
 
-    LB              shift and go to state 68
+    LB              shift and go to state 71
 
 
 state 54
 
-    (61) cmd_constraint -> LB CMD_CONSTRAINT term RB .
+    (63) cmd_constraint -> LB CMD_CONSTRAINT term RB .
 
-    LB              reduce using rule 61 (cmd_constraint -> LB CMD_CONSTRAINT term RB .)
-    $end            reduce using rule 61 (cmd_constraint -> LB CMD_CONSTRAINT term RB .)
+    LB              reduce using rule 63 (cmd_constraint -> LB CMD_CONSTRAINT term RB .)
+    $end            reduce using rule 63 (cmd_constraint -> LB CMD_CONSTRAINT term RB .)
 
 
 state 55
 
-    (63) option -> LB . symbol string RB
-    (13) symbol -> . SYMBOL
+    (25) term -> symbol .
 
-    SYMBOL          shift and go to state 27
+    LB              reduce using rule 25 (term -> symbol .)
+    INT             reduce using rule 25 (term -> symbol .)
+    BOOL_TRUE       reduce using rule 25 (term -> symbol .)
+    BOOL_FALSE      reduce using rule 25 (term -> symbol .)
+    SYMBOL          reduce using rule 25 (term -> symbol .)
+    RB              reduce using rule 25 (term -> symbol .)
 
-    symbol                         shift and go to state 69
 
 state 56
 
-    (66) cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non . RB RB
-
-    RB              shift and go to state 70
-
-
-state 57
-
-    (64) option_list_non -> option .
-    (65) option_list_non -> option . option_list_non
-    (64) option_list_non -> . option
-    (65) option_list_non -> . option option_list_non
-    (63) option -> . LB symbol string RB
-
-    RB              reduce using rule 64 (option_list_non -> option .)
-    LB              shift and go to state 55
-
-    option                         shift and go to state 57
-    option_list_non                shift and go to state 71
-
-state 58
-
-    (56) cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr RB .
-
-    LB              reduce using rule 56 (cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr RB .)
-    $end            reduce using rule 56 (cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr RB .)
-
-
-state 59
-
-    (57) cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr RB .
-
-    LB              reduce using rule 57 (cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr RB .)
-    $end            reduce using rule 57 (cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr RB .)
-
-
-state 60
-
-    (58) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list . RB sort_expr RB
+    (64) cmd_constraint -> LB CMD_CONSTRAINT symbol term_list_non . RB
 
     RB              shift and go to state 72
 
 
+state 57
+
+    (52) term_list_non -> term .
+    (53) term_list_non -> term . term_list_non
+    (52) term_list_non -> . term
+    (53) term_list_non -> . term term_list_non
+    (23) term -> . LB symbol term_list RB
+    (24) term -> . literal
+    (25) term -> . symbol
+    (26) term -> . let_term
+    (15) literal -> . INT
+    (16) literal -> . BOOL_TRUE
+    (17) literal -> . BOOL_FALSE
+    (13) symbol -> . SYMBOL
+    (32) let_term -> . LB LET LB let_clause_list_non RB term RB
+
+    RB              reduce using rule 52 (term_list_non -> term .)
+    LB              shift and go to state 33
+    INT             shift and go to state 38
+    BOOL_TRUE       shift and go to state 39
+    BOOL_FALSE      shift and go to state 40
+    SYMBOL          shift and go to state 27
+
+    term                           shift and go to state 57
+    term_list_non                  shift and go to state 73
+    symbol                         shift and go to state 55
+    literal                        shift and go to state 36
+    let_term                       shift and go to state 37
+
+state 58
+
+    (66) option -> LB . symbol string RB
+    (13) symbol -> . SYMBOL
+
+    SYMBOL          shift and go to state 27
+
+    symbol                         shift and go to state 74
+
+state 59
+
+    (69) cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non . RB RB
+
+    RB              shift and go to state 75
+
+
+state 60
+
+    (67) option_list_non -> option .
+    (68) option_list_non -> option . option_list_non
+    (67) option_list_non -> . option
+    (68) option_list_non -> . option option_list_non
+    (66) option -> . LB symbol string RB
+
+    RB              reduce using rule 67 (option_list_non -> option .)
+    LB              shift and go to state 58
+
+    option                         shift and go to state 60
+    option_list_non                shift and go to state 76
+
 state 61
+
+    (58) cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr RB .
+
+    LB              reduce using rule 58 (cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr RB .)
+    $end            reduce using rule 58 (cmd_define_sort -> LB CMD_DEFINE_SORT symbol sort_expr RB .)
+
+
+state 62
+
+    (59) cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr RB .
+
+    LB              reduce using rule 59 (cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr RB .)
+    $end            reduce using rule 59 (cmd_declare_var -> LB CMD_DECLARE_VAR symbol sort_expr RB .)
+
+
+state 63
+
+    (60) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list . RB sort_expr RB
+
+    RB              shift and go to state 77
+
+
+state 64
 
     (22) sort_expr_list -> sort_expr . sort_expr_list
     (21) sort_expr_list -> .
@@ -877,27 +952,27 @@ state 61
     SORT_BOOL       shift and go to state 47
     SYMBOL          shift and go to state 27
 
-    sort_expr                      shift and go to state 61
-    sort_expr_list                 shift and go to state 73
+    sort_expr                      shift and go to state 64
+    sort_expr_list                 shift and go to state 78
     symbol                         shift and go to state 44
 
-state 62
+state 65
 
     (47) param -> LB . symbol sort_expr RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 74
+    symbol                         shift and go to state 79
 
-state 63
+state 66
 
-    (59) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list . RB sort_expr term RB
+    (61) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list . RB sort_expr term RB
 
-    RB              shift and go to state 75
+    RB              shift and go to state 80
 
 
-state 64
+state 67
 
     (49) param_list -> param . param_list
     (48) param_list -> .
@@ -905,26 +980,26 @@ state 64
     (47) param -> . LB symbol sort_expr RB
 
     RB              reduce using rule 48 (param_list -> .)
-    LB              shift and go to state 62
+    LB              shift and go to state 65
 
-    param                          shift and go to state 64
-    param_list                     shift and go to state 76
+    param                          shift and go to state 67
+    param_list                     shift and go to state 81
 
-state 65
+state 68
 
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list . RB sort_expr LB ntdef_list_non RB RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list . RB sort_expr LB ntdef_list_non RB RB
 
-    RB              shift and go to state 77
+    RB              shift and go to state 82
 
 
-state 66
+state 69
 
     (23) term -> LB symbol term_list . RB
 
-    RB              shift and go to state 78
+    RB              shift and go to state 83
 
 
-state 67
+state 70
 
     (28) term_list -> term . term_list
     (27) term_list -> .
@@ -946,50 +1021,65 @@ state 67
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    term                           shift and go to state 67
-    term_list                      shift and go to state 79
-    symbol                         shift and go to state 35
+    term                           shift and go to state 70
+    term_list                      shift and go to state 84
+    symbol                         shift and go to state 55
     literal                        shift and go to state 36
     let_term                       shift and go to state 37
 
-state 68
+state 71
 
     (32) let_term -> LB LET LB . let_clause_list_non RB term RB
     (30) let_clause_list_non -> . let_clause
     (31) let_clause_list_non -> . let_clause let_clause_list_non
     (29) let_clause -> . LB symbol sort_expr term RB
 
-    LB              shift and go to state 80
+    LB              shift and go to state 85
 
-    let_clause_list_non            shift and go to state 81
-    let_clause                     shift and go to state 82
-
-state 69
-
-    (63) option -> LB symbol . string RB
-    (14) string -> . STRING
-
-    STRING          shift and go to state 84
-
-    string                         shift and go to state 83
-
-state 70
-
-    (66) cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB . RB
-
-    RB              shift and go to state 85
-
-
-state 71
-
-    (65) option_list_non -> option option_list_non .
-
-    RB              reduce using rule 65 (option_list_non -> option option_list_non .)
-
+    let_clause_list_non            shift and go to state 86
+    let_clause                     shift and go to state 87
 
 state 72
 
-    (58) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB . sort_expr RB
+    (64) cmd_constraint -> LB CMD_CONSTRAINT symbol term_list_non RB .
+
+    LB              reduce using rule 64 (cmd_constraint -> LB CMD_CONSTRAINT symbol term_list_non RB .)
+    $end            reduce using rule 64 (cmd_constraint -> LB CMD_CONSTRAINT symbol term_list_non RB .)
+
+
+state 73
+
+    (53) term_list_non -> term term_list_non .
+
+    RB              reduce using rule 53 (term_list_non -> term term_list_non .)
+
+
+state 74
+
+    (66) option -> LB symbol . string RB
+    (14) string -> . STRING
+
+    STRING          shift and go to state 89
+
+    string                         shift and go to state 88
+
+state 75
+
+    (69) cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB . RB
+
+    RB              shift and go to state 90
+
+
+state 76
+
+    (68) option_list_non -> option option_list_non .
+
+    RB              reduce using rule 68 (option_list_non -> option option_list_non .)
+
+
+state 77
+
+    (60) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB . sort_expr RB
     (18) sort_expr -> . SORT_INT
     (19) sort_expr -> . SORT_BOOL
     (20) sort_expr -> . symbol
@@ -1000,16 +1090,16 @@ state 72
     SYMBOL          shift and go to state 27
 
     symbol                         shift and go to state 44
-    sort_expr                      shift and go to state 86
+    sort_expr                      shift and go to state 91
 
-state 73
+state 78
 
     (22) sort_expr_list -> sort_expr sort_expr_list .
 
     RB              reduce using rule 22 (sort_expr_list -> sort_expr sort_expr_list .)
 
 
-state 74
+state 79
 
     (47) param -> LB symbol . sort_expr RB
     (18) sort_expr -> . SORT_INT
@@ -1022,11 +1112,11 @@ state 74
     SYMBOL          shift and go to state 27
 
     symbol                         shift and go to state 44
-    sort_expr                      shift and go to state 87
+    sort_expr                      shift and go to state 92
 
-state 75
+state 80
 
-    (59) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB . sort_expr term RB
+    (61) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB . sort_expr term RB
     (18) sort_expr -> . SORT_INT
     (19) sort_expr -> . SORT_BOOL
     (20) sort_expr -> . symbol
@@ -1037,18 +1127,18 @@ state 75
     SYMBOL          shift and go to state 27
 
     symbol                         shift and go to state 44
-    sort_expr                      shift and go to state 88
+    sort_expr                      shift and go to state 93
 
-state 76
+state 81
 
     (49) param_list -> param param_list .
 
     RB              reduce using rule 49 (param_list -> param param_list .)
 
 
-state 77
+state 82
 
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB . sort_expr LB ntdef_list_non RB RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB . sort_expr LB ntdef_list_non RB RB
     (18) sort_expr -> . SORT_INT
     (19) sort_expr -> . SORT_BOOL
     (20) sort_expr -> . symbol
@@ -1059,9 +1149,9 @@ state 77
     SYMBOL          shift and go to state 27
 
     symbol                         shift and go to state 44
-    sort_expr                      shift and go to state 89
+    sort_expr                      shift and go to state 94
 
-state 78
+state 83
 
     (23) term -> LB symbol term_list RB .
 
@@ -1073,30 +1163,30 @@ state 78
     SYMBOL          reduce using rule 23 (term -> LB symbol term_list RB .)
 
 
-state 79
+state 84
 
     (28) term_list -> term term_list .
 
     RB              reduce using rule 28 (term_list -> term term_list .)
 
 
-state 80
+state 85
 
     (29) let_clause -> LB . symbol sort_expr term RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 90
+    symbol                         shift and go to state 95
 
-state 81
+state 86
 
     (32) let_term -> LB LET LB let_clause_list_non . RB term RB
 
-    RB              shift and go to state 91
+    RB              shift and go to state 96
 
 
-state 82
+state 87
 
     (30) let_clause_list_non -> let_clause .
     (31) let_clause_list_non -> let_clause . let_clause_list_non
@@ -1105,50 +1195,50 @@ state 82
     (29) let_clause -> . LB symbol sort_expr term RB
 
     RB              reduce using rule 30 (let_clause_list_non -> let_clause .)
-    LB              shift and go to state 80
+    LB              shift and go to state 85
 
-    let_clause                     shift and go to state 82
-    let_clause_list_non            shift and go to state 92
+    let_clause                     shift and go to state 87
+    let_clause_list_non            shift and go to state 97
 
-state 83
+state 88
 
-    (63) option -> LB symbol string . RB
+    (66) option -> LB symbol string . RB
 
-    RB              shift and go to state 93
+    RB              shift and go to state 98
 
 
-state 84
+state 89
 
     (14) string -> STRING .
 
     RB              reduce using rule 14 (string -> STRING .)
 
 
-state 85
+state 90
 
-    (66) cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB RB .
+    (69) cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB RB .
 
-    LB              reduce using rule 66 (cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB RB .)
-    $end            reduce using rule 66 (cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB RB .)
-
-
-state 86
-
-    (58) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr . RB
-
-    RB              shift and go to state 94
+    LB              reduce using rule 69 (cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB RB .)
+    $end            reduce using rule 69 (cmd_set_options -> LB CMD_SET_OPTIONS LB option_list_non RB RB .)
 
 
-state 87
+state 91
+
+    (60) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr . RB
+
+    RB              shift and go to state 99
+
+
+state 92
 
     (47) param -> LB symbol sort_expr . RB
 
-    RB              shift and go to state 95
+    RB              shift and go to state 100
 
 
-state 88
+state 93
 
-    (59) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr . term RB
+    (61) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr . term RB
     (23) term -> . LB symbol term_list RB
     (24) term -> . literal
     (25) term -> . symbol
@@ -1165,19 +1255,19 @@ state 88
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 35
-    term                           shift and go to state 96
+    symbol                         shift and go to state 55
+    term                           shift and go to state 101
     literal                        shift and go to state 36
     let_term                       shift and go to state 37
 
-state 89
+state 94
 
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr . LB ntdef_list_non RB RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr . LB ntdef_list_non RB RB
 
-    LB              shift and go to state 97
+    LB              shift and go to state 102
 
 
-state 90
+state 95
 
     (29) let_clause -> LB symbol . sort_expr term RB
     (18) sort_expr -> . SORT_INT
@@ -1190,9 +1280,9 @@ state 90
     SYMBOL          shift and go to state 27
 
     symbol                         shift and go to state 44
-    sort_expr                      shift and go to state 98
+    sort_expr                      shift and go to state 103
 
-state 91
+state 96
 
     (32) let_term -> LB LET LB let_clause_list_non RB . term RB
     (23) term -> . LB symbol term_list RB
@@ -1211,35 +1301,35 @@ state 91
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    term                           shift and go to state 99
-    symbol                         shift and go to state 35
+    term                           shift and go to state 104
+    symbol                         shift and go to state 55
     literal                        shift and go to state 36
     let_term                       shift and go to state 37
 
-state 92
+state 97
 
     (31) let_clause_list_non -> let_clause let_clause_list_non .
 
     RB              reduce using rule 31 (let_clause_list_non -> let_clause let_clause_list_non .)
 
 
-state 93
+state 98
 
-    (63) option -> LB symbol string RB .
+    (66) option -> LB symbol string RB .
 
-    LB              reduce using rule 63 (option -> LB symbol string RB .)
-    RB              reduce using rule 63 (option -> LB symbol string RB .)
-
-
-state 94
-
-    (58) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB .
-
-    LB              reduce using rule 58 (cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB .)
-    $end            reduce using rule 58 (cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB .)
+    LB              reduce using rule 66 (option -> LB symbol string RB .)
+    RB              reduce using rule 66 (option -> LB symbol string RB .)
 
 
-state 95
+state 99
+
+    (60) cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB .
+
+    LB              reduce using rule 60 (cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB .)
+    $end            reduce using rule 60 (cmd_declare_fun -> LB CMD_DECLARE_FUN symbol LB sort_expr_list RB sort_expr RB .)
+
+
+state 100
 
     (47) param -> LB symbol sort_expr RB .
 
@@ -1247,26 +1337,26 @@ state 95
     RB              reduce using rule 47 (param -> LB symbol sort_expr RB .)
 
 
-state 96
+state 101
 
-    (59) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term . RB
+    (61) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term . RB
 
-    RB              shift and go to state 100
+    RB              shift and go to state 105
 
 
-state 97
+state 102
 
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB . ntdef_list_non RB RB
-    (53) ntdef_list_non -> . ntdef
-    (54) ntdef_list_non -> . ntdef ntdef_list_non
-    (52) ntdef -> . LB symbol sort_expr LB gterm_list_non RB RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB . ntdef_list_non RB RB
+    (55) ntdef_list_non -> . ntdef
+    (56) ntdef_list_non -> . ntdef ntdef_list_non
+    (54) ntdef -> . LB symbol sort_expr LB gterm_list_non RB RB
 
-    LB              shift and go to state 101
+    LB              shift and go to state 106
 
-    ntdef_list_non                 shift and go to state 102
-    ntdef                          shift and go to state 103
+    ntdef_list_non                 shift and go to state 107
+    ntdef                          shift and go to state 108
 
-state 98
+state 103
 
     (29) let_clause -> LB symbol sort_expr . term RB
     (23) term -> . LB symbol term_list RB
@@ -1285,64 +1375,64 @@ state 98
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 35
-    term                           shift and go to state 104
+    symbol                         shift and go to state 55
+    term                           shift and go to state 109
     literal                        shift and go to state 36
     let_term                       shift and go to state 37
 
-state 99
+state 104
 
     (32) let_term -> LB LET LB let_clause_list_non RB term . RB
 
-    RB              shift and go to state 105
+    RB              shift and go to state 110
 
 
-state 100
+state 105
 
-    (59) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB .
+    (61) cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB .
 
-    LB              reduce using rule 59 (cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB .)
-    $end            reduce using rule 59 (cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB .)
+    LB              reduce using rule 61 (cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB .)
+    $end            reduce using rule 61 (cmd_define_fun -> LB CMD_DEFINE_FUN symbol LB param_list RB sort_expr term RB .)
 
 
-state 101
+state 106
 
-    (52) ntdef -> LB . symbol sort_expr LB gterm_list_non RB RB
+    (54) ntdef -> LB . symbol sort_expr LB gterm_list_non RB RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 106
+    symbol                         shift and go to state 111
 
-state 102
+state 107
 
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non . RB RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non . RB RB
 
-    RB              shift and go to state 107
+    RB              shift and go to state 112
 
 
-state 103
+state 108
 
-    (53) ntdef_list_non -> ntdef .
-    (54) ntdef_list_non -> ntdef . ntdef_list_non
-    (53) ntdef_list_non -> . ntdef
-    (54) ntdef_list_non -> . ntdef ntdef_list_non
-    (52) ntdef -> . LB symbol sort_expr LB gterm_list_non RB RB
+    (55) ntdef_list_non -> ntdef .
+    (56) ntdef_list_non -> ntdef . ntdef_list_non
+    (55) ntdef_list_non -> . ntdef
+    (56) ntdef_list_non -> . ntdef ntdef_list_non
+    (54) ntdef -> . LB symbol sort_expr LB gterm_list_non RB RB
 
-    RB              reduce using rule 53 (ntdef_list_non -> ntdef .)
-    LB              shift and go to state 101
+    RB              reduce using rule 55 (ntdef_list_non -> ntdef .)
+    LB              shift and go to state 106
 
-    ntdef                          shift and go to state 103
-    ntdef_list_non                 shift and go to state 108
+    ntdef                          shift and go to state 108
+    ntdef_list_non                 shift and go to state 113
 
-state 104
+state 109
 
     (29) let_clause -> LB symbol sort_expr term . RB
 
-    RB              shift and go to state 109
+    RB              shift and go to state 114
 
 
-state 105
+state 110
 
     (32) let_term -> LB LET LB let_clause_list_non RB term RB .
 
@@ -1354,9 +1444,9 @@ state 105
     SYMBOL          reduce using rule 32 (let_term -> LB LET LB let_clause_list_non RB term RB .)
 
 
-state 106
+state 111
 
-    (52) ntdef -> LB symbol . sort_expr LB gterm_list_non RB RB
+    (54) ntdef -> LB symbol . sort_expr LB gterm_list_non RB RB
     (18) sort_expr -> . SORT_INT
     (19) sort_expr -> . SORT_BOOL
     (20) sort_expr -> . symbol
@@ -1367,23 +1457,23 @@ state 106
     SYMBOL          shift and go to state 27
 
     symbol                         shift and go to state 44
-    sort_expr                      shift and go to state 110
+    sort_expr                      shift and go to state 115
 
-state 107
+state 112
 
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB . RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB . RB
 
-    RB              shift and go to state 111
-
-
-state 108
-
-    (54) ntdef_list_non -> ntdef ntdef_list_non .
-
-    RB              reduce using rule 54 (ntdef_list_non -> ntdef ntdef_list_non .)
+    RB              shift and go to state 116
 
 
-state 109
+state 113
+
+    (56) ntdef_list_non -> ntdef ntdef_list_non .
+
+    RB              reduce using rule 56 (ntdef_list_non -> ntdef ntdef_list_non .)
+
+
+state 114
 
     (29) let_clause -> LB symbol sort_expr term RB .
 
@@ -1391,24 +1481,24 @@ state 109
     RB              reduce using rule 29 (let_clause -> LB symbol sort_expr term RB .)
 
 
-state 110
+state 115
 
-    (52) ntdef -> LB symbol sort_expr . LB gterm_list_non RB RB
+    (54) ntdef -> LB symbol sort_expr . LB gterm_list_non RB RB
 
-    LB              shift and go to state 112
-
-
-state 111
-
-    (60) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB .
-
-    LB              reduce using rule 60 (cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB .)
-    $end            reduce using rule 60 (cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB .)
+    LB              shift and go to state 117
 
 
-state 112
+state 116
 
-    (52) ntdef -> LB symbol sort_expr LB . gterm_list_non RB RB
+    (62) cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB .
+
+    LB              reduce using rule 62 (cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB .)
+    $end            reduce using rule 62 (cmd_synth_fun -> LB CMD_SYNTH_FUN symbol LB param_list RB sort_expr LB ntdef_list_non RB RB .)
+
+
+state 117
+
+    (54) ntdef -> LB symbol sort_expr LB . gterm_list_non RB RB
     (50) gterm_list_non -> . gterm
     (51) gterm_list_non -> . gterm gterm_list_non
     (33) gterm -> . LB symbol gterm_list RB
@@ -1425,19 +1515,19 @@ state 112
     (13) symbol -> . SYMBOL
     (46) let_gterm -> . LB LET LB let_gclause_list_non RB gterm RB
 
-    LB              shift and go to state 113
+    LB              shift and go to state 118
     INT             shift and go to state 38
     BOOL_TRUE       shift and go to state 39
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 114
-    gterm_list_non                 shift and go to state 115
-    gterm                          shift and go to state 116
-    literal                        shift and go to state 117
-    let_gterm                      shift and go to state 118
+    symbol                         shift and go to state 119
+    gterm_list_non                 shift and go to state 120
+    gterm                          shift and go to state 121
+    literal                        shift and go to state 122
+    let_gterm                      shift and go to state 123
 
-state 113
+state 118
 
     (33) gterm -> LB . symbol gterm_list RB
     (37) gterm -> LB . EXP_CONSTANT sort_expr RB
@@ -1447,16 +1537,16 @@ state 113
     (46) let_gterm -> LB . LET LB let_gclause_list_non RB gterm RB
     (13) symbol -> . SYMBOL
 
-    EXP_CONSTANT    shift and go to state 120
-    EXP_VARIABLE    shift and go to state 121
-    EXP_INPUT_VARIABLE shift and go to state 122
-    EXP_LOCAL_VARIABLE shift and go to state 123
-    LET             shift and go to state 124
+    EXP_CONSTANT    shift and go to state 125
+    EXP_VARIABLE    shift and go to state 126
+    EXP_INPUT_VARIABLE shift and go to state 127
+    EXP_LOCAL_VARIABLE shift and go to state 128
+    LET             shift and go to state 129
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 119
+    symbol                         shift and go to state 124
 
-state 114
+state 119
 
     (35) gterm -> symbol .
 
@@ -1468,14 +1558,14 @@ state 114
     RB              reduce using rule 35 (gterm -> symbol .)
 
 
-state 115
+state 120
 
-    (52) ntdef -> LB symbol sort_expr LB gterm_list_non . RB RB
+    (54) ntdef -> LB symbol sort_expr LB gterm_list_non . RB RB
 
-    RB              shift and go to state 125
+    RB              shift and go to state 130
 
 
-state 116
+state 121
 
     (50) gterm_list_non -> gterm .
     (51) gterm_list_non -> gterm . gterm_list_non
@@ -1496,19 +1586,19 @@ state 116
     (46) let_gterm -> . LB LET LB let_gclause_list_non RB gterm RB
 
     RB              reduce using rule 50 (gterm_list_non -> gterm .)
-    LB              shift and go to state 113
+    LB              shift and go to state 118
     INT             shift and go to state 38
     BOOL_TRUE       shift and go to state 39
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    gterm                          shift and go to state 116
-    gterm_list_non                 shift and go to state 126
-    symbol                         shift and go to state 114
-    literal                        shift and go to state 117
-    let_gterm                      shift and go to state 118
+    gterm                          shift and go to state 121
+    gterm_list_non                 shift and go to state 131
+    symbol                         shift and go to state 119
+    literal                        shift and go to state 122
+    let_gterm                      shift and go to state 123
 
-state 117
+state 122
 
     (34) gterm -> literal .
 
@@ -1520,7 +1610,7 @@ state 117
     RB              reduce using rule 34 (gterm -> literal .)
 
 
-state 118
+state 123
 
     (36) gterm -> let_gterm .
 
@@ -1532,7 +1622,7 @@ state 118
     RB              reduce using rule 36 (gterm -> let_gterm .)
 
 
-state 119
+state 124
 
     (33) gterm -> LB symbol . gterm_list RB
     (41) gterm_list -> .
@@ -1552,19 +1642,19 @@ state 119
     (46) let_gterm -> . LB LET LB let_gclause_list_non RB gterm RB
 
     RB              reduce using rule 41 (gterm_list -> .)
-    LB              shift and go to state 113
+    LB              shift and go to state 118
     INT             shift and go to state 38
     BOOL_TRUE       shift and go to state 39
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 114
-    gterm_list                     shift and go to state 127
-    gterm                          shift and go to state 128
-    literal                        shift and go to state 117
-    let_gterm                      shift and go to state 118
+    symbol                         shift and go to state 119
+    gterm_list                     shift and go to state 132
+    gterm                          shift and go to state 133
+    literal                        shift and go to state 122
+    let_gterm                      shift and go to state 123
 
-state 120
+state 125
 
     (37) gterm -> LB EXP_CONSTANT . sort_expr RB
     (18) sort_expr -> . SORT_INT
@@ -1576,10 +1666,10 @@ state 120
     SORT_BOOL       shift and go to state 47
     SYMBOL          shift and go to state 27
 
-    sort_expr                      shift and go to state 129
+    sort_expr                      shift and go to state 134
     symbol                         shift and go to state 44
 
-state 121
+state 126
 
     (38) gterm -> LB EXP_VARIABLE . sort_expr RB
     (18) sort_expr -> . SORT_INT
@@ -1591,10 +1681,10 @@ state 121
     SORT_BOOL       shift and go to state 47
     SYMBOL          shift and go to state 27
 
-    sort_expr                      shift and go to state 130
+    sort_expr                      shift and go to state 135
     symbol                         shift and go to state 44
 
-state 122
+state 127
 
     (39) gterm -> LB EXP_INPUT_VARIABLE . sort_expr RB
     (18) sort_expr -> . SORT_INT
@@ -1606,10 +1696,10 @@ state 122
     SORT_BOOL       shift and go to state 47
     SYMBOL          shift and go to state 27
 
-    sort_expr                      shift and go to state 131
+    sort_expr                      shift and go to state 136
     symbol                         shift and go to state 44
 
-state 123
+state 128
 
     (40) gterm -> LB EXP_LOCAL_VARIABLE . sort_expr RB
     (18) sort_expr -> . SORT_INT
@@ -1621,38 +1711,38 @@ state 123
     SORT_BOOL       shift and go to state 47
     SYMBOL          shift and go to state 27
 
-    sort_expr                      shift and go to state 132
+    sort_expr                      shift and go to state 137
     symbol                         shift and go to state 44
 
-state 124
+state 129
 
     (46) let_gterm -> LB LET . LB let_gclause_list_non RB gterm RB
 
-    LB              shift and go to state 133
+    LB              shift and go to state 138
 
 
-state 125
+state 130
 
-    (52) ntdef -> LB symbol sort_expr LB gterm_list_non RB . RB
+    (54) ntdef -> LB symbol sort_expr LB gterm_list_non RB . RB
 
-    RB              shift and go to state 134
+    RB              shift and go to state 139
 
 
-state 126
+state 131
 
     (51) gterm_list_non -> gterm gterm_list_non .
 
     RB              reduce using rule 51 (gterm_list_non -> gterm gterm_list_non .)
 
 
-state 127
+state 132
 
     (33) gterm -> LB symbol gterm_list . RB
 
-    RB              shift and go to state 135
+    RB              shift and go to state 140
 
 
-state 128
+state 133
 
     (42) gterm_list -> gterm . gterm_list
     (41) gterm_list -> .
@@ -1672,67 +1762,67 @@ state 128
     (46) let_gterm -> . LB LET LB let_gclause_list_non RB gterm RB
 
     RB              reduce using rule 41 (gterm_list -> .)
-    LB              shift and go to state 113
+    LB              shift and go to state 118
     INT             shift and go to state 38
     BOOL_TRUE       shift and go to state 39
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    gterm                          shift and go to state 128
-    gterm_list                     shift and go to state 136
-    symbol                         shift and go to state 114
-    literal                        shift and go to state 117
-    let_gterm                      shift and go to state 118
+    gterm                          shift and go to state 133
+    gterm_list                     shift and go to state 141
+    symbol                         shift and go to state 119
+    literal                        shift and go to state 122
+    let_gterm                      shift and go to state 123
 
-state 129
+state 134
 
     (37) gterm -> LB EXP_CONSTANT sort_expr . RB
 
-    RB              shift and go to state 137
+    RB              shift and go to state 142
 
 
-state 130
+state 135
 
     (38) gterm -> LB EXP_VARIABLE sort_expr . RB
 
-    RB              shift and go to state 138
+    RB              shift and go to state 143
 
 
-state 131
+state 136
 
     (39) gterm -> LB EXP_INPUT_VARIABLE sort_expr . RB
 
-    RB              shift and go to state 139
+    RB              shift and go to state 144
 
 
-state 132
+state 137
 
     (40) gterm -> LB EXP_LOCAL_VARIABLE sort_expr . RB
 
-    RB              shift and go to state 140
+    RB              shift and go to state 145
 
 
-state 133
+state 138
 
     (46) let_gterm -> LB LET LB . let_gclause_list_non RB gterm RB
     (44) let_gclause_list_non -> . let_gclause
     (45) let_gclause_list_non -> . let_gclause let_gclause_list_non
     (43) let_gclause -> . LB symbol sort_expr gterm RB
 
-    LB              shift and go to state 141
+    LB              shift and go to state 146
 
-    let_gclause_list_non           shift and go to state 142
-    let_gclause                    shift and go to state 143
+    let_gclause_list_non           shift and go to state 147
+    let_gclause                    shift and go to state 148
 
-state 134
+state 139
 
-    (52) ntdef -> LB symbol sort_expr LB gterm_list_non RB RB .
+    (54) ntdef -> LB symbol sort_expr LB gterm_list_non RB RB .
 
-    LB              reduce using rule 52 (ntdef -> LB symbol sort_expr LB gterm_list_non RB RB .)
-    RB              reduce using rule 52 (ntdef -> LB symbol sort_expr LB gterm_list_non RB RB .)
+    LB              reduce using rule 54 (ntdef -> LB symbol sort_expr LB gterm_list_non RB RB .)
+    RB              reduce using rule 54 (ntdef -> LB symbol sort_expr LB gterm_list_non RB RB .)
 
 
-state 135
+state 140
 
     (33) gterm -> LB symbol gterm_list RB .
 
@@ -1744,14 +1834,14 @@ state 135
     RB              reduce using rule 33 (gterm -> LB symbol gterm_list RB .)
 
 
-state 136
+state 141
 
     (42) gterm_list -> gterm gterm_list .
 
     RB              reduce using rule 42 (gterm_list -> gterm gterm_list .)
 
 
-state 137
+state 142
 
     (37) gterm -> LB EXP_CONSTANT sort_expr RB .
 
@@ -1763,7 +1853,7 @@ state 137
     RB              reduce using rule 37 (gterm -> LB EXP_CONSTANT sort_expr RB .)
 
 
-state 138
+state 143
 
     (38) gterm -> LB EXP_VARIABLE sort_expr RB .
 
@@ -1775,7 +1865,7 @@ state 138
     RB              reduce using rule 38 (gterm -> LB EXP_VARIABLE sort_expr RB .)
 
 
-state 139
+state 144
 
     (39) gterm -> LB EXP_INPUT_VARIABLE sort_expr RB .
 
@@ -1787,7 +1877,7 @@ state 139
     RB              reduce using rule 39 (gterm -> LB EXP_INPUT_VARIABLE sort_expr RB .)
 
 
-state 140
+state 145
 
     (40) gterm -> LB EXP_LOCAL_VARIABLE sort_expr RB .
 
@@ -1799,23 +1889,23 @@ state 140
     RB              reduce using rule 40 (gterm -> LB EXP_LOCAL_VARIABLE sort_expr RB .)
 
 
-state 141
+state 146
 
     (43) let_gclause -> LB . symbol sort_expr gterm RB
     (13) symbol -> . SYMBOL
 
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 144
+    symbol                         shift and go to state 149
 
-state 142
+state 147
 
     (46) let_gterm -> LB LET LB let_gclause_list_non . RB gterm RB
 
-    RB              shift and go to state 145
+    RB              shift and go to state 150
 
 
-state 143
+state 148
 
     (44) let_gclause_list_non -> let_gclause .
     (45) let_gclause_list_non -> let_gclause . let_gclause_list_non
@@ -1824,12 +1914,12 @@ state 143
     (43) let_gclause -> . LB symbol sort_expr gterm RB
 
     RB              reduce using rule 44 (let_gclause_list_non -> let_gclause .)
-    LB              shift and go to state 141
+    LB              shift and go to state 146
 
-    let_gclause                    shift and go to state 143
-    let_gclause_list_non           shift and go to state 146
+    let_gclause                    shift and go to state 148
+    let_gclause_list_non           shift and go to state 151
 
-state 144
+state 149
 
     (43) let_gclause -> LB symbol . sort_expr gterm RB
     (18) sort_expr -> . SORT_INT
@@ -1842,9 +1932,9 @@ state 144
     SYMBOL          shift and go to state 27
 
     symbol                         shift and go to state 44
-    sort_expr                      shift and go to state 147
+    sort_expr                      shift and go to state 152
 
-state 145
+state 150
 
     (46) let_gterm -> LB LET LB let_gclause_list_non RB . gterm RB
     (33) gterm -> . LB symbol gterm_list RB
@@ -1861,25 +1951,25 @@ state 145
     (13) symbol -> . SYMBOL
     (46) let_gterm -> . LB LET LB let_gclause_list_non RB gterm RB
 
-    LB              shift and go to state 113
+    LB              shift and go to state 118
     INT             shift and go to state 38
     BOOL_TRUE       shift and go to state 39
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    gterm                          shift and go to state 148
-    symbol                         shift and go to state 114
-    literal                        shift and go to state 117
-    let_gterm                      shift and go to state 118
+    gterm                          shift and go to state 153
+    symbol                         shift and go to state 119
+    literal                        shift and go to state 122
+    let_gterm                      shift and go to state 123
 
-state 146
+state 151
 
     (45) let_gclause_list_non -> let_gclause let_gclause_list_non .
 
     RB              reduce using rule 45 (let_gclause_list_non -> let_gclause let_gclause_list_non .)
 
 
-state 147
+state 152
 
     (43) let_gclause -> LB symbol sort_expr . gterm RB
     (33) gterm -> . LB symbol gterm_list RB
@@ -1896,32 +1986,32 @@ state 147
     (13) symbol -> . SYMBOL
     (46) let_gterm -> . LB LET LB let_gclause_list_non RB gterm RB
 
-    LB              shift and go to state 113
+    LB              shift and go to state 118
     INT             shift and go to state 38
     BOOL_TRUE       shift and go to state 39
     BOOL_FALSE      shift and go to state 40
     SYMBOL          shift and go to state 27
 
-    symbol                         shift and go to state 114
-    gterm                          shift and go to state 149
-    literal                        shift and go to state 117
-    let_gterm                      shift and go to state 118
+    symbol                         shift and go to state 119
+    gterm                          shift and go to state 154
+    literal                        shift and go to state 122
+    let_gterm                      shift and go to state 123
 
-state 148
+state 153
 
     (46) let_gterm -> LB LET LB let_gclause_list_non RB gterm . RB
 
-    RB              shift and go to state 150
+    RB              shift and go to state 155
 
 
-state 149
+state 154
 
     (43) let_gclause -> LB symbol sort_expr gterm . RB
 
-    RB              shift and go to state 151
+    RB              shift and go to state 156
 
 
-state 150
+state 155
 
     (46) let_gterm -> LB LET LB let_gclause_list_non RB gterm RB .
 
@@ -1933,7 +2023,7 @@ state 150
     RB              reduce using rule 46 (let_gterm -> LB LET LB let_gclause_list_non RB gterm RB .)
 
 
-state 151
+state 156
 
     (43) let_gclause -> LB symbol sort_expr gterm RB .
 

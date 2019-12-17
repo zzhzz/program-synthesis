@@ -73,7 +73,7 @@ class Expr:
         return r
 
     @staticmethod
-    def build_let(lets, children):
+    def build_let(lets, child):
         r = Expr()
         r.type = ExprType.Let
         r.lets = lets

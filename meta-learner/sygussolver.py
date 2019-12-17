@@ -92,8 +92,8 @@ class SygusGraph:
         self.non_terminal_gen_count = [iter(range(40)) for _ in range(20)]
         self.global_counter = iter(range(20))
         self.local_counter = iter(range(20))
-        self.rule_list = {}
         self.non_terminal_list = {}
+        self.rule_list = {}
         self.add_links()
 
     def add_links(self):
@@ -412,8 +412,8 @@ class SygusSolver:
             for expr in rule.exprs:
                 node_child, _ = self.graph.add_gen_rule(id_root)
                 self.graph.add_edge(node_root, node_child, "GEN")
-                self.graph.rule_mapping[rule.name][1].append(node_child)
                 self.graph.rule_list[node_child] = expr
+                self.graph.rule_mapping[rule.name][1].append(node_child)
 
     def push_locals(self, locals):
         self.local_envs.append(locals)

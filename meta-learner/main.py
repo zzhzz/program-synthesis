@@ -33,36 +33,40 @@ def stripComments(bmFile):
 
 def main():
     hid_dim = 100
-    EPOCH = 10
+    episodes = 10
+    EPOCH = 100
     EPS = .85
-    DECAY = .9999
+    DECAY = .99999
 
-
-    with open('../open_tests/max2.sl', 'r') as fh:
+    prob = 'array_search_2.sl'
+    prob = 's2.sl'
+    # prob = 'max3.sl'
+    # prob = 'max3.sl'
+    with open('../open_tests/' + prob, 'r') as fh:
         problem = sygusparser.parser.parse(fh.read())
         solver = SygusSolver()
         graph = solver.solve(problem)
-    with open('../open_tests/max2.sl', 'r') as fh:
+    with open('../open_tests/' + prob, 'r') as fh:
         bm = stripComments(fh)
         bmExpr = sexp.sexp.parseString(bm, parseAll=True).asList()[0] #Parse string to python list
     G = build_graph(graph)
-    graph_emb = GGNN(tokens=1000, hiddens=hid_dim, edge_types=6, steps=3)
+    graph_emb = GGNN(tokens=1000, hiddens=hid_dim, edge_types=6, steps=4)
     decoder = RecursiveDecoder(hiddens=hid_dim)
 
     params = [graph_emb.parameters(), decoder.parameters()]
 
-    opt = th.optim.Adam(chain.from_iterable(params), lr=0.001)
+    opt = th.optim.Adamax(chain.from_iterable(params), lr=0.001)
 
     for epoch in range(EPOCH):
         epoch_best_reward = -5.0
         epoch_best_root = None
         epoch_acc_reward = 0.0
 
-        for k in range(100):
+        for k in range(4000):
             gemb = graph_emb(G)
             total_loss, rudder_loss, best_reward, best_tree, acc_reward = rollout(bmExpr, graph, gemb, decoder, None,
                                                                                   (epoch_acc_reward / (k + 1)),
-                                                                                  num_episode=10,
+                                                                                  num_episode=episodes,
                                                                                   use_random=True, eps=EPS)
             EPS *= DECAY
 

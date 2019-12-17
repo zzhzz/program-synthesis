@@ -39,7 +39,7 @@ class RLEnv:
                 return new_tree, depth
 
             ntree, dep = Expand(self.tree, 0)
-            if dep >= 10:
+            if dep >= 15:
                 self.r = -1.0
                 self.expand_ls = []
             if ntree is None:
@@ -59,9 +59,8 @@ class RLEnv:
     def rewards(self):
         if self.is_done():
             if self.r is None:
-                return self.checker.check(self.tree, self.t)
-            else:
-                return self.r
+                self.r = self.checker.check(self.tree)
+            return self.r
         else:
             return 0.0
 
@@ -106,7 +105,7 @@ def a2c_loss(nll_list, value_list, reward_list):
     # accumlated future reward
     for t in range(len(reward_list) - 1, -1, -1):
         r += reward_list[t]
-        rewards.insert(0, r / 10.0)
+        rewards.insert(0, r / len(reward_list))
 
     policy_loss = 0.0
     targets = []

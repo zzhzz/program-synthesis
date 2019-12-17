@@ -93,13 +93,12 @@ def ReadQuery(bmExpr):
             self.solver = Solver()
 
         def check(self, funcDefStr):
-            const = []
+            const = {}
             for idx, constraint in enumerate(Constraints):
                 self.solver.push()
                 spec_smt2 = [funcDefStr]
                 spec_smt2.append('(assert %s)' % (toString(constraint[1:])))
                 spec_smt2 = '\n'.join(spec_smt2)
-                # print spec_smt2
                 spec = parse_smt2_string(spec_smt2, decls=dict(self.VarTable))
                 spec = And(spec)
                 self.solver.add(Not(spec))
@@ -112,51 +111,66 @@ def ReadQuery(bmExpr):
                 else:
                     model = self.solver.model()
                     self.solver.pop()
-                    const.append((idx, model))
-            return const
+                    const[idx] = model
+            return const, len(Constraints)
 
     checker = Checker(VarTable, synFunction, Constraints)
-    return checker
+    return checker, len(Constraints)
 
 
 class Checker:
     def __init__(self, expr):
-        self.ce_dict = [{} for _ in range(10)]
-        self.appear = {}
         self.pc = .7
         self.pm = .1
         self.n = 20
-        self.checker = ReadQuery(expr)
+        self.checker, self.sz = ReadQuery(expr)
+        self.ce_dict = [{} for _ in range(self.sz)]
+        self.appear = [{} for _ in range(self.sz)]
+        self.const_dict = [{} for _ in range(self.sz)]
+        for i in range(self.sz):
+            self.const_dict[i]['pass'] = 0
+            self.const_dict[i]['fail'] = 0
+        self.program_dict = [{} for _ in range(self.sz)]
         SynFunExpr = []
         for expr in expr:
             if len(expr)==0:
                 continue
             elif expr[0]=='synth-fun':
                 SynFunExpr=expr
-        self.FuncDefine = ['define-fun']+SynFunExpr[1:4] #copy function signature
+        self.FuncDefine = ['define-fun'] + SynFunExpr[1:4]
 
-    def check(self, tree, step):
+    def check(self, tree):
         FuncDefineStr = translator.toString(self.FuncDefine,
-                                            ForceBracket=True)  # use Force Bracket = True on function definition. MAGIC CODE. DO NOT MODIFY THE ARGUMENT ForceBracket = True.
+                                            ForceBracket=True)
         CurrStr = translator.toString(tree)
-        Str = FuncDefineStr[:-1] + ' ' + CurrStr + FuncDefineStr[-1]  # insert Program just before the last bracket ')'
-        examples = self.checker.check(Str)
-        rewards = 0.0
-        print('Current: ' + Str)
+        Str = FuncDefineStr[:-1] + ' ' + CurrStr + FuncDefineStr[-1]
+        print('Curr ' + Str)
+        examples, sz = self.checker.check(Str)
+        rewards = 1.0
         if len(examples) == 0:
             print('Found')
             print(Str)
-        for item in examples:
-            constraint_id, example = item
+            quit()
+        for key in examples.keys():
+            constraint_id, example = key, examples[key]
+            if Str in self.program_dict[constraint_id].keys():
+                self.program_dict[constraint_id][Str] = self.program_dict[constraint_id][Str] * .9 + 1.0
+            else:
+                self.program_dict[constraint_id][Str] = 1
+
             if example in self.ce_dict[constraint_id].keys():
-                self.ce_dict[constraint_id][example] += 1
+                self.ce_dict[constraint_id][example] = self.ce_dict[constraint_id][example] * .7 + 1.0
             else:
                 self.ce_dict[constraint_id][example] = 1
-                self.appear[example] = step
 
-        for constraint_id in range(10):
-            diction = self.ce_dict[constraint_id]
-            for key in diction.keys():
-                if (constraint_id, key) not in examples:
-                    rewards += diction[key] / float(step - self.appear[key] + 1)
+        for constraint_id in range(sz):
+            if constraint_id not in examples.keys():
+                self.const_dict[constraint_id]['pass'] += 1
+            else:
+                self.const_dict[constraint_id]['fail'] += 1
+            if constraint_id not in examples.keys():
+                # pass
+                rewards += len(self.ce_dict[constraint_id].keys()) / float(self.const_dict[constraint_id]['pass'])
+            else:
+                rewards -= len(self.ce_dict[constraint_id].keys()) * float(self.const_dict[constraint_id]['fail'])
         return rewards

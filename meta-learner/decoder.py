@@ -15,7 +15,7 @@ class RecursiveDecoder(nn.Module):
         self.value_net = nn.Sequential(
             nn.Linear(self.hid, self.hid),
             nn.ReLU(),
-            nn.Linear(self.hid, self.hid)
+            nn.Linear(self.hid, 1)
         )
 
         self.first_attn = nn.Linear(self.hid, 1)
@@ -65,7 +65,7 @@ class RecursiveDecoder(nn.Module):
     def choose_action(self, state, cls_w, use_random, eps):
         logits = F.linear(state, cls_w, None)
 
-        ll = F.log_softmax(logits)
+        ll = F.log_softmax(logits, dim=1)
         if use_random:
             scores = th.exp(ll) * (1. - eps) + eps / ll.shape[1]
             picked = th.multinomial(scores, 1)
