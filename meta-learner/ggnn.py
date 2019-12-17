@@ -5,11 +5,13 @@ import dgl
 import dgl.function as fn
 
 class GGNN(nn.Module):
-    def __init__(self, hiddens, edge_types, steps):
+    def __init__(self, tokens, hiddens, edge_types, steps):
         super(GGNN, self).__init__()
+        self.tokens = tokens
         self.state_dim = hiddens
         self.edge_type = edge_types
         self.n_step = steps
+        self.emb = nn.Embedding(tokens, self.state_dim)
         self.fc_weights = nn.Embedding(edge_types, self.state_dim * self.state_dim * 2)
         self.edge_message = fn.src_mul_edge(src='h', edge='e_w', out='h')
         self.message_func = fn.copy_edge(edge='h', out='h')
@@ -27,8 +29,8 @@ class GGNN(nn.Module):
             nn.Tanh()
         )
 
-    def forward(self, g, x):
-        prop_state = x
+    def forward(self, g):
+        prop_state = self.emb(g.ndata['token'])
         edge_weight = self.fc_weights(g.edata['type']).view(-1, self.state_dim, self.state_dim, 2)
         g.edata.update({
             'e_w': edge_weight.view(-1, self.state_dim, self.state_dim * 2)

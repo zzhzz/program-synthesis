@@ -3,23 +3,57 @@ import torch.nn.functional as F
 import numpy as np
 from ggnn import GGNN
 from checker import Checker
+from collections import deque
 
 class RLEnv:
     def __init__(self, samples):
+        self.graph = samples
         self.t = 0
-        self.tree = None
-        self.checker = Checker()
-        self.action_ls = [()]
+        self.tree = ['Start']
+        # self.checker = Checker()
+        self.expand_ls = ['Start']
+        self.action = None
+        self.cfg_mapping = samples.rule_mapping
+        self.rule_list = samples.rule_list
+        self.nonterm_list = {}
+        for key in samples.non_terminal_list:
+            self.nonterm_list[samples.non_terminal_list[key]] = key
+
+    def step(self):
+        if self.action is not None:
+            def Expand(tree):
+                new_tree = None
+                for idx, item in enumerate(tree):
+                    if isinstance(item, list):
+                        expand = Expand(item)
+                        if expand is not None:
+                            new_tree = tree[0:idx] + [expand] + tree[idx+1:]
+                    elif item in self.nonterm_list.keys():
+                        new_tree = tree[0:idx] + [self.action] + tree[idx+1:]
+                    if new_tree is not None:
+                        return new_tree
+                return new_tree
+
+            ntree = Expand(self.tree)
+            if ntree is None:
+                raise ValueError
+            self.tree = ntree
+        else:
+            raise ValueError
 
     def is_done(self):
-        pass
+        return len(self.expand_ls) == 0
 
     def reset(self):
         self.t = 0
-        self.tree = None
+        self.tree = ['Start']
 
     def rewards(self):
-        pass
+        if self.is_done():
+
+            pass
+        else:
+            return 0.0
 
 
 
@@ -31,15 +65,13 @@ def rollout(sample, graph_embedding, decoder, rudder, previous_avg_return, num_e
 
         env = RLEnv(sample)
         decoder.reset()
-        # rudder.reset()
         while not env.is_done():
             nll, val = decoder(env, graph_embedding, use_random, eps)
+            env.step()
             reward = env.rewards()
-
             NLL_list.append(nll)
             value_list.append(val)
             reward_list.append(reward)
-
             env.t += 1
         true_return = np.sum(reward_list)
         policy_loss, val_loss = a2c_loss(NLL_list, value_list, reward_list)
