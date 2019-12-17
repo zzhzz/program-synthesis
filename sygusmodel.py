@@ -1,7 +1,10 @@
 import numpy as np
 import tensorflow as tf
 import time
+import os
+import h5py
 
+os.environ['CUDA_VISIBLE_DEVICES'] = ""
 
 def scaled_dot_product_attention(q, k, v, mask):
     """Calculate the attention weights.
@@ -187,25 +190,28 @@ class Model(tf.keras.Model):
             self.d_model,
             self.num_heads,
             self.dff,
-            self.input_vocab_sizem,
+            self.input_vocab_size,
             self.maximum_position_encoding,
             self.dropout_rate,
         )
 
     def __call__(self, x, idxnon, pos, training, mask, mask_cross):
         x = self.encoder(x, training)
-        gen = x[:, :2500] # (b, 2500, model)
-        gen = tf.reshape(gen, [-1 ,5, 50, 10, self.d_model]) # (b, 5, 50, 10, model)
-        gen = tf.gather(gen, tf.expand_dims(idxnon, -1), batch_dims=1) # (b, 1, 50, 10, model)
-        gen = tf.squeeze(gen, axis=1) # (b, 50, 10, model)
-        gen = tf.max(gen, axis=2) # (b, 50, model)
+        gen = x[:, :2500]  # (b, 2500, model)
+        gen = tf.reshape(gen, [-1, 5, 50, 10, self.d_model])  # (b, 5, 50, 10, model)
+        gen = tf.gather(
+            gen, tf.expand_dims(idxnon, -1), batch_dims=1
+        )  # (b, 1, 50, 10, model)
+        gen = tf.squeeze(gen, axis=1)  # (b, 50, 10, model)
+        gen = tf.max(gen, axis=2)  # (b, 50, model)
 
-        non = x[6500:] # (b, 1000, model)
-        non = tf.gather(non, tf.expand_dims(pos, -1), batch_dims=1) # (b, 1, model)
+        non = x[6500:]  # (b, 1000, model)
+        non = tf.gather(non, tf.expand_dims(pos, -1), batch_dims=1)  # (b, 1, model)
 
         cross = tf.math.reduce_sum(gen * non, axis=-1)
         cross = cross + mask_cross * -1e9
         return cross
+
 
 model = Model()
 
@@ -235,23 +241,24 @@ if ckpt_manager.latest_checkpoint:
 
 EPOCHS = 1000
 
+
 def create_masks(x):
     return x, x
 
 
 @tf.function(
     input_signature=[
-        tf.TensorSpec(shape=(None, None), dtype=tf.int64),
-        tf.TensorSpec(shape=(None, None), dtype=tf.int64),
+        tf.TensorSpec(shape=(None, 7500), dtype=tf.int32),
+        tf.TensorSpec(shape=(None), dtype=tf.int32),
+        tf.TensorSpec(shape=(None), dtype=tf.int32),
+        tf.TensorSpec(shape=(None), dtype=tf.int32),
     ]
 )
 def train_step(x, idxnon, pos, idxrule):
     mask, mask_cross = create_masks(x)
 
     with tf.GradientTape() as tape:
-        predictions, _ = model(
-            x, idxnon, pos, True, mask, mask_cross
-        )
+        predictions, _ = model(x, idxnon, pos, True, mask, mask_cross)
         loss = loss_function(idxrule, predictions)
 
     gradients = tape.gradient(loss, model.trainable_variables)
@@ -261,6 +268,19 @@ def train_step(x, idxnon, pos, idxrule):
     train_accuracy(idxrule, predictions)
 
 
+BUFFER_SIZE = 20000
+BATCH_SIZE = 32
+
+traindata = h5py.File("train.h5", "r")
+traindata = (
+    traindata["seq"][()],
+    traindata["idxnon"][()],
+    traindata["pos"][()],
+    traindata["idxrule"][()],
+)
+traindata = tf.data.Dataset.from_tensor_slices(traindata)
+traindata = traindata.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+
 for epoch in range(EPOCHS):
     start = time.time()
 
@@ -268,8 +288,8 @@ for epoch in range(EPOCHS):
     train_accuracy.reset_states()
 
     # inp -> portuguese, tar -> english
-    for (batch, (inp, tar)) in enumerate(train_dataset):
-        train_step(inp, tar)
+    for (batch, (x, idxnon, pos, idxrule)) in enumerate(traindata):
+        train_step(x, idxnon, pos, idxrule)
 
         if batch % 50 == 0:
             print(
