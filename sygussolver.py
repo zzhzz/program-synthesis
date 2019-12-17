@@ -287,7 +287,7 @@ class SygusSolver:
                                     break
                             assert k != -1
                             if len(expr) < 1000:
-                                sygusdata.write((self.list_synths, self.list_constraints, expr, i, k, j))
+                                sygusdata.write((self.list_synths, self.list_constraints, sygusmap.apply_to_list(expr), i, k, j))
                             return [expr[:i] + result + expr[i + 1 :]]
                     newresults = [expr[:i] + result + expr[i + 1 :] for result in results if expandfirst in result]
                     assert len(newresults) == 1

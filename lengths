@@ -1,0 +1,11 @@
+nonterminal: 5
+rules: 50
+rule len: 10
+cons: 20
+conlen: 200
+synthlen: 1000
+
+5*50*10 + 20*200 + 1000
+
+2500+4000+1000
+seqlen: 7500
