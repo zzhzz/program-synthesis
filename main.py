@@ -36,6 +36,7 @@ if __name__ == '__main__':
     bm = stripComments(benchmarkFile)
     bmExpr = sexp.sexp.parseString(bm, parseAll=True).asList()[0] #Parse string to python list
     #pprint.pprint(bmExpr)
+    print(bmExpr)
     checker=translator.ReadQuery(bmExpr)
     #print (checker.check('(define-fun f ((x Int)) Int (mod (* x 3) 10)  )'))
     #raw_input()

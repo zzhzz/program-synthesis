@@ -1,7 +1,6 @@
 from z3 import Int, Bool, IntSort, BoolSort, Solver, And, Not, parse_smt2_file, parse_smt2_string, unsat, Function
-
 verbose = False
-
+import translator
 
 def DeclareVar(sort, name):
     if sort == "Int":
@@ -94,45 +93,59 @@ def ReadQuery(bmExpr):
             self.solver = Solver()
 
         def check(self, funcDefStr):
-            self.solver.push()
-
-            spec_smt2 = [funcDefStr]
-            for constraint in Constraints:
+            const = []
+            for idx, constraint in enumerate(Constraints):
+                self.solver.push()
+                spec_smt2 = [funcDefStr]
                 spec_smt2.append('(assert %s)' % (toString(constraint[1:])))
-            spec_smt2 = '\n'.join(spec_smt2)
-            # print spec_smt2
-            spec = parse_smt2_string(spec_smt2, decls=dict(self.VarTable))
-            spec = And(spec)
-            self.solver.add(Not(spec))
-            if verbose:
-                print("spec:", spec)
+                spec_smt2 = '\n'.join(spec_smt2)
+                # print spec_smt2
+                spec = parse_smt2_string(spec_smt2, decls=dict(self.VarTable))
+                spec = And(spec)
+                self.solver.add(Not(spec))
+                if verbose:
+                    print("spec:", spec)
 
-            res = self.solver.check()
-            if res == unsat:
-                self.solver.pop()
-                return None
-            else:
-                model = self.solver.model()
-                self.solver.pop()
-
-                return model
+                res = self.solver.check()
+                if res == unsat:
+                    self.solver.pop()
+                else:
+                    model = self.solver.model()
+                    self.solver.pop()
+                    const.append((idx, model))
+            return const
 
     checker = Checker(VarTable, synFunction, Constraints)
     return checker
 
 
 class Checker:
-    def __init__(self, solver):
-        self.ce_dict = [set() for _ in range(10)]
+    def __init__(self, expr):
+        self.ce_dict = [{} for _ in range(10)]
         self.appear = {}
         self.pc = .7
         self.pm = .1
         self.n = 20
-        self.solver = solver
+        self.checker = ReadQuery(expr)
+        SynFunExpr = []
+        for expr in expr:
+            if len(expr)==0:
+                continue
+            elif expr[0]=='synth-fun':
+                SynFunExpr=expr
+        self.FuncDefine = ['define-fun']+SynFunExpr[1:4] #copy function signature
 
     def check(self, tree, step):
-        examples = self.solver.check(tree)
+        FuncDefineStr = translator.toString(self.FuncDefine,
+                                            ForceBracket=True)  # use Force Bracket = True on function definition. MAGIC CODE. DO NOT MODIFY THE ARGUMENT ForceBracket = True.
+        CurrStr = translator.toString(tree)
+        Str = FuncDefineStr[:-1] + ' ' + CurrStr + FuncDefineStr[-1]  # insert Program just before the last bracket ')'
+        examples = self.checker.check(Str)
         rewards = 0.0
+        print('Current: ' + Str)
+        if len(examples) == 0:
+            print('Found')
+            print(Str)
         for item in examples:
             constraint_id, example = item
             if example in self.ce_dict[constraint_id].keys():

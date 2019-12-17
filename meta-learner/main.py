@@ -1,6 +1,7 @@
 import os
 import sys
 import dgl
+import sexp
 import sygusparser
 import numpy as np
 import torch as th
@@ -22,7 +23,12 @@ def build_graph(graph):
     return g
 
 
-
+def stripComments(bmFile):
+    noComments = '('
+    for line in bmFile:
+        line = line.split(';', 1)[0]
+        noComments += line
+    return noComments + ')'
 
 
 def main():
@@ -36,6 +42,9 @@ def main():
         problem = sygusparser.parser.parse(fh.read())
         solver = SygusSolver()
         graph = solver.solve(problem)
+    with open('../open_tests/max2.sl', 'r') as fh:
+        bm = stripComments(fh)
+        bmExpr = sexp.sexp.parseString(bm, parseAll=True).asList()[0] #Parse string to python list
     G = build_graph(graph)
     graph_emb = GGNN(tokens=1000, hiddens=hid_dim, edge_types=6, steps=3)
     decoder = RecursiveDecoder(hiddens=hid_dim)
@@ -51,7 +60,7 @@ def main():
 
         for k in range(100):
             gemb = graph_emb(G)
-            total_loss, rudder_loss, best_reward, best_tree, acc_reward = rollout(graph, gemb, decoder, None,
+            total_loss, rudder_loss, best_reward, best_tree, acc_reward = rollout(bmExpr, graph, gemb, decoder, None,
                                                                                   (epoch_acc_reward / (k + 1)),
                                                                                   num_episode=10,
                                                                                   use_random=True, eps=EPS)
@@ -67,10 +76,6 @@ def main():
             loss.backward()
             opt.step()
             print('Avg reward: %.4f'% (epoch_acc_reward / (k+1)))
-
-
-
-
 
 
 if __name__ == '__main__':

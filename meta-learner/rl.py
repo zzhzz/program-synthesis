@@ -5,12 +5,14 @@ from ggnn import GGNN
 from checker import Checker
 from collections import deque
 
+
 class RLEnv:
-    def __init__(self, samples):
+    def __init__(self, samples, expr):
         self.graph = samples
         self.t = 0
+        self.r = None
         self.tree = ['Start']
-        # self.checker = Checker()
+        self.checker = Checker(expr)
         self.expand_ls = ['Start']
         self.action = None
         self.cfg_mapping = samples.rule_mapping
@@ -21,20 +23,25 @@ class RLEnv:
 
     def step(self):
         if self.action is not None:
-            def Expand(tree):
+            def Expand(tree, dep):
+                depth = dep
                 new_tree = None
                 for idx, item in enumerate(tree):
                     if isinstance(item, list):
-                        expand = Expand(item)
+                        expand, d = Expand(item, dep+1)
+                        depth = max(depth, d)
                         if expand is not None:
                             new_tree = tree[0:idx] + [expand] + tree[idx+1:]
                     elif item in self.nonterm_list.keys():
                         new_tree = tree[0:idx] + [self.action] + tree[idx+1:]
                     if new_tree is not None:
-                        return new_tree
-                return new_tree
+                        return new_tree, depth
+                return new_tree, depth
 
-            ntree = Expand(self.tree)
+            ntree, dep = Expand(self.tree, 0)
+            if dep >= 10:
+                self.r = -1.0
+                self.expand_ls = []
             if ntree is None:
                 raise ValueError
             self.tree = ntree
@@ -46,24 +53,27 @@ class RLEnv:
 
     def reset(self):
         self.t = 0
+        self.r = None
         self.tree = ['Start']
 
     def rewards(self):
         if self.is_done():
-
-            pass
+            if self.r is None:
+                return self.checker.check(self.tree, self.t)
+            else:
+                return self.r
         else:
             return 0.0
 
 
 
 
-def rollout(sample, graph_embedding, decoder, rudder, previous_avg_return, num_episode, use_random, eps):
+def rollout(expr, sample, graph_embedding, decoder, rudder, previous_avg_return, num_episode, use_random, eps):
     total_loss, rudder_loss, best_reward, best_tree, acc_reward = 0.0, 0.0, -5.0, None, 0.0
     for episode_id in range(num_episode):
         NLL_list, value_list, reward_list = [], [], []
 
-        env = RLEnv(sample)
+        env = RLEnv(sample, expr)
         decoder.reset()
         while not env.is_done():
             nll, val = decoder(env, graph_embedding, use_random, eps)

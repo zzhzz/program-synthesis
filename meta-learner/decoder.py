@@ -52,10 +52,10 @@ class RecursiveDecoder(nn.Module):
         rule = env.rule_list[prod_rules[act_ind]]
         if rule.type == ExprType.Func:
             args_ls = list(rule.children) if rule.children is not None else []
-            args = [r.name for r in args_ls]
-            env.action = [rule.name] + args
+            args = [str(r.name) for r in args_ls]
+            env.action = [str(rule.name)] + args
         else:
-            env.action = rule.value
+            env.action = str(rule.value)
         args_ls = list(rule.children) if rule.children is not None else []
         argname_ls = [r.name for r in args_ls]
         env.expand_ls = argname_ls + env.expand_ls
