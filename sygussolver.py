@@ -117,7 +117,7 @@ class SygusSolver:
             r.sort = sort
             return r
         elif expr.type == ExprType.Let:
-            newnames = [self.new_local(c.sort, "l") for c in expr.lets]
+            newnames = [self.new_local(c.sort, "l", c.name) for c in expr.lets]
             lets = tuple(
                 (LetClause(c.name, c.sort, self.lookup_expr(c.expr)) for c in expr.lets)
             )
@@ -159,7 +159,8 @@ class SygusSolver:
         if "Start" not in symbols:
             raise Exception("Start not in synth rules")
         newnames = [
-            self.new_local(r.sort, "s") if r.name != "Start" else "Start" for r in rules
+            self.new_local(r.sort, "s", r.name) if r.name != "Start" else "Start"
+            for r in rules
         ]
         self.push_locals(
             {r.name: (r.sort, newname) for r, newname in zip(rules, newnames)}
@@ -192,16 +193,23 @@ class SygusSolver:
         # if isinstance(expr, list):
         #     return f"({' '.join(self.list_expr_to_string(e) for e in expr)})"
         # return str(expr)
-        return ' '.join(expr)
+        return " ".join(expr)
 
-    def expr_to_define_cmd(self, expr):
+    def expr_to_define_cmd(self, expr, back=False):
         # return ' '.join(expr)
         name = self.synthcmd.det.name
         params_sort = self.synthcmd.det.paramsorts
         params_name = self.synthcmd.params
+        if back:
+            params_name = [
+                (self.rename_back[s] if s in self.rename_back else s)
+                for s in params_name
+            ]
         params_str = " ".join(
             [f"({n} {str(s)})" for s, n in zip(params_sort, params_name)]
         )
+        if back:
+            expr = [(self.rename_back[s] if s in self.rename_back else s) for s in expr]
         return f"(define-fun {name} ({params_str}) {self.synthcmd.sort} {self.list_expr_to_string(expr)})"
 
     def check_valid(self, expr):
@@ -219,7 +227,7 @@ class SygusSolver:
         all_cmds = z3.parse_smt2_string(all_cmds)
         solver = z3.Solver()
         if solver.check(all_cmds) == z3.unsat:
-            print(cmd_define_func)
+            print(self.expr_to_define_cmd(expr, True))
             return True
         return False
 
@@ -267,12 +275,14 @@ class SygusSolver:
     def pop_locals(self):
         self.local_envs.pop()
 
-    def get_new_name(self, funtypeidx):
+    def get_new_name(self, funtypeidx, origin_name):
         counter = self.rename_counter[funtypeidx]
         count = next(counter)
-        return funtypeidx + str(count)
+        newname = funtypeidx + str(count)
+        self.rename_back[newname] = origin_name
+        return newname
 
-    def rename_decl(self, decl):
+    def rename_decl(self, decl, origin_name):
         if len(decl.det.paramsorts) != 0:
             funtypeidx = "declf"
         else:
@@ -280,9 +290,9 @@ class SygusSolver:
                 funtypeidx = "declb"
             elif decl.sort == SortValue.Int:
                 funtypeidx = "decli"
-        return self.get_new_name(funtypeidx)
+        return self.get_new_name(funtypeidx, origin_name)
 
-    def rename_def(self, decl):
+    def rename_def(self, decl, origin_name):
         if len(decl.det.paramsorts) != 0:
             funtypeidx = "deff"
         else:
@@ -290,11 +300,11 @@ class SygusSolver:
                 funtypeidx = "defb"
             elif decl.sort == SortValue.Int:
                 funtypeidx = "defi"
-        return self.get_new_name(funtypeidx)
+        return self.get_new_name(funtypeidx, origin_name)
 
-    def rename_synth(self, decl):
+    def rename_synth(self, decl, origin_name):
         funtypeidx = "synth"
-        return self.get_new_name(funtypeidx)
+        return self.get_new_name(funtypeidx, origin_name)
 
     VARIABLE_TABLE = {
         (SortValue.Bool, "pd"): "pdb",
@@ -307,8 +317,8 @@ class SygusSolver:
         (SortValue.Int, "s"): "si",
     }
 
-    def new_local(self, sort, t):
-        return self.get_new_name(SygusSolver.VARIABLE_TABLE[(sort, t)])
+    def new_local(self, sort, t, origin_name):
+        return self.get_new_name(SygusSolver.VARIABLE_TABLE[(sort, t)], origin_name)
 
     def solve(self, sygusproblem):
         self.sort_table = {}
@@ -332,7 +342,7 @@ class SygusSolver:
                 det = self.lookup_det(cmd.det)
                 self.ensure_none(det)
                 sort = self.lookup_sort(cmd.sort)
-                newname = self.rename_decl(CmdDeclFun(det, sort))
+                newname = self.rename_decl(CmdDeclFun(det, sort), det.name)
                 self.decls[det.to_tuple()] = newname
                 self.decls_rename[newname] = CmdDeclFun(
                     FuncDet(newname, det.paramsorts), sort
@@ -342,13 +352,16 @@ class SygusSolver:
                 self.ensure_none(det)
                 params = cmd.params
                 sort = self.lookup_sort(cmd.sort)
-                newnames = [self.new_local(s, "pd") for s in det.paramsorts]
+                newnames = [
+                    self.new_local(s, "pd", oldname)
+                    for s, oldname in zip(det.paramsorts, params)
+                ]
                 self.push_locals(dict(zip(params, zip(det.paramsorts, newnames))))
                 expr = self.lookup_expr(cmd.expr)
                 self.pop_locals()
                 if expr.sort != sort:
                     raise Exception(f"Func wrong type: {expr} {expr.sort} {sort}")
-                newname = self.rename_def(CmdDefFun(det, params, sort, expr))
+                newname = self.rename_def(CmdDefFun(det, params, sort, expr), det.name)
                 self.defines[det.to_tuple()] = newname
                 self.defines_rename[newname] = CmdDefFun(
                     FuncDet(newname, det.paramsorts), newnames, sort, expr
@@ -359,7 +372,10 @@ class SygusSolver:
                 params = cmd.params
                 self.ensure_distinct(params)
                 sort = self.lookup_sort(cmd.sort)
-                newnames = [self.new_local(s, "ps") for s in det.paramsorts]
+                newnames = [
+                    self.new_local(s, "ps", oldname)
+                    for s, oldname in zip(det.paramsorts, params)
+                ]
                 self.push_locals(dict(zip(params, zip(det.paramsorts, newnames))))
                 rules = self.lookup_rules(cmd.rules)
                 self.pop_locals()
@@ -369,7 +385,9 @@ class SygusSolver:
                             raise Exception(
                                 f"Synth func type mismatch: {det.name} {sort} {r.sort}"
                             )
-                newname = self.rename_synth(CmdSynthFun(det, params, sort, rules))
+                newname = self.rename_synth(
+                    CmdSynthFun(det, params, sort, rules), det.name
+                )
                 self.synths[det.to_tuple()] = newname
                 self.synths_rename[newname] = CmdSynthFun(
                     FuncDet(newname, det.paramsorts), newnames, sort, rules
