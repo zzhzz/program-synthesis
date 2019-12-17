@@ -177,10 +177,10 @@ class Model(tf.keras.Model):
     def __init__(self):
         super(Model, self).__init__()
 
-        self.num_layers = 4
-        self.d_model = 16
-        self.dff = 16
-        self.num_heads = 4
+        self.num_layers = 2
+        self.d_model = 8
+        self.dff = 8
+        self.num_heads = 1
         self.input_vocab_size = 1600
         self.dropout_rate = 0.1
         self.maximum_position_encoding = 7500
@@ -210,6 +210,7 @@ class Model(tf.keras.Model):
 
         cross = tf.math.reduce_sum(gen * non, axis=-1)
         cross = cross + mask_cross * -1e9
+        # cross = tf.nn.softmax(cross)
         return cross
 
 
@@ -255,14 +256,14 @@ def create_masks(x, idxnon):
     return mask1, mask_del
 
 BUFFER_SIZE = 20000
-BATCH_SIZE = 1
+BATCH_SIZE = 8
 
 @tf.function(
     input_signature=[
-        tf.TensorSpec(shape=(BATCH_SIZE, 7500), dtype=tf.int32),
-        tf.TensorSpec(shape=(BATCH_SIZE), dtype=tf.int32),
-        tf.TensorSpec(shape=(BATCH_SIZE), dtype=tf.int32),
-        tf.TensorSpec(shape=(BATCH_SIZE), dtype=tf.int32),
+        tf.TensorSpec(shape=(None, 7500), dtype=tf.int32),
+        tf.TensorSpec(shape=(None,), dtype=tf.int32),
+        tf.TensorSpec(shape=(None,), dtype=tf.int32),
+        tf.TensorSpec(shape=(None,), dtype=tf.int32),
     ]
 )
 def train_step(x, idxnon, pos, idxrule):
@@ -276,6 +277,8 @@ def train_step(x, idxnon, pos, idxrule):
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
     train_loss(loss)
+    # tf.print(idxrule)
+    # tf.print(tf.argmax(predictions, -1))
     train_accuracy(idxrule, predictions)
 
 
@@ -299,16 +302,15 @@ for epoch in range(EPOCHS):
     for (batch, (x, idxnon, pos, idxrule)) in enumerate(traindata):
         train_step(x, idxnon, pos, idxrule)
 
-        if batch % 50 == 0:
+        if batch % 1 == 0:
             print(
                 "Epoch {} Batch {} Loss {:.4f} Accuracy {:.4f}".format(
                     epoch + 1, batch, train_loss.result(), train_accuracy.result()
                 )
             )
 
-    if (epoch + 1) % 5 == 0:
-        ckpt_save_path = ckpt_manager.save()
-        print("Saving checkpoint for epoch {} at {}".format(epoch + 1, ckpt_save_path))
+    ckpt_save_path = ckpt_manager.save()
+    print("Saving checkpoint for epoch {} at {}".format(epoch + 1, ckpt_save_path))
 
     print(
         "Epoch {} Loss {:.4f} Accuracy {:.4f}".format(
