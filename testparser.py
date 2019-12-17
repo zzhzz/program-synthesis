@@ -9,7 +9,13 @@ INPUT_DIR = 'open_tests'
 
 files = sorted(os.listdir(INPUT_DIR))
 
+ignores = [
+    'max_11.sl', 'max12.sl', 'max13.sl', 'max14.sl', 'max15.sl'
+]
+
 for fname in files:
+    if fname in ignores:
+        continue
     print(fname)
     time0 = time.time()
     cmds = sygusparser.parser.parse(open(os.path.join(INPUT_DIR, fname)).read())

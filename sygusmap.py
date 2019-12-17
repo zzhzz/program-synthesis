@@ -80,4 +80,4 @@ def apply_to_list(l):
     m = get_word_map()
     for i, a in enumerate(l):
         result[i] = m[a]
-    return m
+    return result
