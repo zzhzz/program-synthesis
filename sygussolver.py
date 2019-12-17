@@ -117,6 +117,7 @@ class SygusSolver:
             r.sort = sort
             return r
         elif expr.type == ExprType.Let:
+            newnames = [self.new_local(c.sort, 'l') for c in expr.lets]
             lets = tuple(
                 (LetClause(c.name, c.sort, self.lookup_expr(c.expr)) for c in expr.lets)
             )
@@ -125,7 +126,10 @@ class SygusSolver:
                     raise Exception(
                         f"Let clause wrong type: {c.expr} {c.expr.sort} {c.sort}"
                     )
-            self.push_locals({c.name: c.sort for c in lets})
+            self.push_locals({c.name: (c.sort, newname) for c, newname in zip(lets, newnames)})
+            lets = tuple(
+                (LetClause(newname, c.sort, c.expr) for c, newname in zip(lets, newnames))
+            )
             child = self.lookup_expr(self, expr.children[0])
             self.pop_locals()
             r = Expr.build_let(lets, child)
@@ -149,9 +153,10 @@ class SygusSolver:
         self.ensure_distinct(symbols)
         if "Start" not in symbols:
             raise Exception("Start not in synth rules")
-        self.push_locals({r.name: r.sort for r in rules})
+        newnames = [self.new_local(r.sort, "s") if r.name != "Start" else "Start" for r in rules]
+        self.push_locals({r.name: (r.sort, newname) for r, newname in zip(rules, newnames)})
         rules = tuple(
-            (GenRule(r.name, r.sort, self.lookup_exprs(r.exprs)) for r in rules)
+            [GenRule(newname, r.sort, self.lookup_exprs(r.exprs)) for r, newname in zip(rules, newnames)]
         )
         for r in rules:
             for e in r.exprs:
@@ -280,14 +285,11 @@ class SygusSolver:
         funtypeidx = "synth"
         return self.get_new_name(funtypeidx)
 
-    def reset_local_counters(self):
-        for name in SygusSolver.VARIABLE_TABLE.values():
-            self.rename_counter[name] = iter(count())
-
-
     VARIABLE_TABLE={
-            (SortValue.Bool, "p"): "pb",
-            (SortValue.Int, "p"): "pi",
+            (SortValue.Bool, "pd"): "pdb",
+            (SortValue.Int, "pd"): "pdi",
+            (SortValue.Bool, "ps"): "psb",
+            (SortValue.Int, "ps"): "psi",
             (SortValue.Bool, "l"): "lb",
             (SortValue.Int, "l"): "li",
             (SortValue.Bool, "s"): "sb",
@@ -326,7 +328,8 @@ class SygusSolver:
                 self.ensure_none(det)
                 params = cmd.params
                 sort = self.lookup_sort(cmd.sort)
-                self.push_locals(dict(zip(params, det.paramsorts)))
+                newnames = [self.new_local(s, "pd") for s in det.paramsorts]
+                self.push_locals(dict(zip(params, zip(det.paramsorts, newnames))))
                 expr = self.lookup_expr(cmd.expr)
                 self.pop_locals()
                 if expr.sort != sort:
@@ -340,6 +343,7 @@ class SygusSolver:
                 params = cmd.params
                 self.ensure_distinct(params)
                 sort = self.lookup_sort(cmd.sort)
+                newnames = [self.new_local(s, "ps") for s in det.paramsorts]
                 self.push_locals(dict(zip(params, det.paramsorts)))
                 rules = self.lookup_rules(cmd.rules)
                 self.pop_locals()
