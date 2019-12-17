@@ -81,3 +81,6 @@ def apply_to_list(l):
     for i, a in enumerate(l):
         result[i] = m[a]
     return result
+
+if __name__ == "__main__":
+    print(len(get_word_map()))
