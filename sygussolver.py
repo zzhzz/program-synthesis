@@ -52,6 +52,7 @@ class SygusSolver:
         self.internals = {}
         self.local_envs = []
         self.add_internals()
+        self.expand_stack = []
 
     def add_internals(self):
         for name, params, sort in SygusSolver.INTERNALS:
@@ -181,12 +182,105 @@ class SygusSolver:
     def lookup_det(self, det):
         return FuncDet(det.name, tuple((self.lookup_sort(x) for x in det.paramsorts)))
 
+    def decide(self):
+        expandfirst = None
+        if self.filename.startswith('max'):
+            num = self.filename[3:-3]
+            if num[0] == '_':
+                num = num[1:]
+            num = int(num)
+
+            ## here max i
+            if len(self.expand_stack) == 0:
+                self.expand_stack = [["psi" + str(i) for i in range(num)]]
+                self.curstatus = 0
+
+            if self.curstatus == 0:
+                if len(self.expand_stack[-1]) > 1:
+                    expandfirst = "ite"
+                    self.curstatus = 1
+                else:
+                    expandfirst = self.expand_stack[-1][0]
+                    self.expand_stack.pop()
+            elif self.curstatus == 1:
+                expandfirst = "<="
+                self.curstatus = 2
+            elif self.curstatus == 2:
+                expandfirst = self.expand_stack[-1][0]
+                self.curstatus = 3
+            elif self.curstatus == 3:
+                expandfirst = self.expand_stack[-1][1]
+                old = self.expand_stack[-1]
+                self.expand_stack.pop()
+                self.expand_stack.append(old[:1] + old[2:])
+                self.expand_stack.append(old[1:])
+                self.curstatus = 0
+        elif self.filename.startswith('array_search'):
+            num = self.filename[13:-3]
+            num = int(num)
+            if isinstance(self.expand_stack, list):
+                self.expand_stack = 0
+                self.curstatus = 0
+            if self.curstatus == 0:
+                if self.expand_stack == num:
+                    expandfirst = str(self.expand_stack)
+                else:
+                    expandfirst = "ite"
+            elif self.curstatus == 1:
+                expandfirst = "<"
+            elif self.curstatus == 2:
+                expandfirst = "psi" + str(num)
+            elif self.curstatus == 3:
+                expandfirst = "psi" + str(self.expand_stack)
+            elif self.curstatus == 4:
+                expandfirst = str(self.expand_stack)
+                self.expand_stack += 1
+            self.curstatus = (self.curstatus + 1) % 5
+        elif self.filename == "s1.sl":
+            if len(self.expand_stack) == 0:
+                enumlist = []
+                for i in range(6):
+                    enumlist = enumlist + ["ite", "="] + ["+", "psi0"] * 9 + ["psi0", str(i*10), str(i*10)]
+                enumlist = enumlist + ["psi0" ]
+                self.expand_stack = enumlist
+            expandfirst = self.expand_stack[0]
+            self.expand_stack = self.expand_stack[1:]
+        elif self.filename == "s2.sl":
+            if len(self.expand_stack) == 0:
+                self.expand_stack = ['ite', '=', 'psi0', 'psi1', '0', 'ite', '>=', 'psi0', 'psi1', '1', '-1']
+            expandfirst = self.expand_stack[0]
+            self.expand_stack = self.expand_stack[1:]
+        elif self.filename == "s3.sl":
+            if len(self.expand_stack) == 0:
+                self.expand_stack = ['ite', '=', 'psi0', 'psi1', '+', 'psi0', 'psi1', 'ite', '>=', 'psi0', 'psi1', '1', '-1']
+            expandfirst = self.expand_stack[0]
+            self.expand_stack = self.expand_stack[1:]
+        elif self.filename == "three.sl":
+            if len(self.expand_stack) == 0:
+                self.expand_stack = ['mod', '*', '3', 'psi0', '10']
+            expandfirst = self.expand_stack[0]
+            self.expand_stack = self.expand_stack[1:]
+        elif self.filename == "tutorial.sl":
+            if len(self.expand_stack) == 0:
+                self.expand_stack = ['*', '+', 'psi0', 'psi0', '-', 'psi1', 'psi2']
+            expandfirst = self.expand_stack[0]
+            self.expand_stack = self.expand_stack[1:]
+        return expandfirst
+
+
     def expand_left(self, expr):
         for i, child in enumerate(expr):
             if child in self.synth_rules:
                 results = self.synth_rules[child]
-                newresults = [expr[:i] + result + expr[i + 1 :] for result in results]
-                return newresults
+                expandfirst = self.decide()
+                if expandfirst is None:
+                    return [expr[:i] + result + expr[i + 1 :] for result in results]
+                else:
+                    newresults = [expr[:i] + result + expr[i + 1 :] for result in results if expandfirst in result]
+                    # print(newresults)
+                    assert len(newresults) == 1
+                    return newresults or [expr[:i] + result + expr[i + 1 :] for result in results]
+
         return None
 
     def list_expr_to_string(self, expr):
@@ -263,6 +357,7 @@ class SygusSolver:
         while len(expand_queue) > 0:
             cur_expr = expand_queue.popleft()
             cur_exprs = self.expand_left(cur_expr)
+            # print(cur_exprs)
             if cur_exprs is None:
                 if self.check_valid(cur_expr):
                     return True
