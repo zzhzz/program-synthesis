@@ -19,6 +19,7 @@ from sygustree import (
     SygusProblem,
 )
 
+import heapq
 import z3
 import time
 
@@ -270,7 +271,7 @@ class SygusSolver:
         return expandfirst
 
 
-    def expand_left(self, expr):
+    def expand_left(self, cur_p, expr):
         for i, child in enumerate(expr):
             if child in self.synth_rules:
                 results = self.synth_rules[child]
@@ -371,18 +372,24 @@ class SygusSolver:
         self.constraint_combine_str = self.constraint_combine.to_assert_str()
         self.cmd_declears_str = [str(f) for f in self.decls_rename.values()]
 
-        expand_queue = deque()
-        expand_queue.append(["Start"])
+        expand_queue = []
+        heapq.heappush(expand_queue, (-1, ["Start"]))
+        # expand_queue.append(["Start"])
 
         while len(expand_queue) > 0:
-            cur_expr = expand_queue.popleft()
-            cur_exprs = self.expand_left(cur_expr)
+            # cur_expr = expand_queue.popleft()
+            cur_p, cur_expr = heapq.heappop()
+            new_exprs = self.expand_left(cur_p, cur_expr)
             # print(cur_exprs)
-            if cur_exprs is None:
+            if new_exprs is None:
                 if self.check_valid(cur_expr):
                     return True
             else:
-                expand_queue.extend(cur_exprs)
+                expand_queue.extend(new_exprs)
+
+
+        print("(failed)")
+        return None
 
     def push_locals(self, locals):
         self.local_envs.append(locals)

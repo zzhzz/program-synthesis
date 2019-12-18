@@ -4,8 +4,6 @@ import time
 import os
 import h5py
 
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
-
 
 def scaled_dot_product_attention(q, k, v, mask):
     """Calculate the attention weights.
@@ -214,34 +212,10 @@ class Model(tf.keras.Model):
         return cross
 
 
-model = Model()
-
-optimizer = tf.keras.optimizers.Adam()
-
-loss_object = tf.keras.losses.CategoricalCrossentropy(
-    from_logits=True, reduction=tf.keras.losses.Reduction.NONE
-)
-
-
-def loss_function(real, pred):
-    real = tf.one_hot(real, 50, dtype=tf.float32)
-    loss_ = loss_object(real, pred)
-    return tf.reduce_mean(loss_)
-
-
-train_loss = tf.keras.metrics.Mean(name="train_loss")
-train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name="train_accuracy")
-
-
-checkpoint_path = "./train"
-ckpt = tf.train.Checkpoint(transformer=model, optimizer=optimizer)
-ckpt_manager = tf.train.CheckpointManager(ckpt, checkpoint_path, max_to_keep=5)
-if ckpt_manager.latest_checkpoint:
-    ckpt.restore(ckpt_manager.latest_checkpoint)
-    print("Latest checkpoint restored!!")
-
-
 EPOCHS = 1000
+
+BUFFER_SIZE = 20000
+BATCH_SIZE = 8
 
 
 def create_masks(x, idxnon):
@@ -255,68 +229,113 @@ def create_masks(x, idxnon):
     mask_del = tf.cast(mask2 == 0, tf.float32)
     return mask1, mask_del
 
-BUFFER_SIZE = 20000
-BATCH_SIZE = 8
 
-@tf.function(
-    input_signature=[
-        tf.TensorSpec(shape=(None, 7500), dtype=tf.int32),
-        tf.TensorSpec(shape=(None,), dtype=tf.int32),
-        tf.TensorSpec(shape=(None,), dtype=tf.int32),
-        tf.TensorSpec(shape=(None,), dtype=tf.int32),
-    ]
-)
-def train_step(x, idxnon, pos, idxrule):
-    mask1, mask_del = create_masks(x, idxnon)
+class SygusNetwork:
+    def __init__(self):
+        self.model = Model()
 
-    with tf.GradientTape() as tape:
-        predictions = model(x, idxnon, pos, True, mask1, mask_del)
-        loss = loss_function(idxrule, predictions)
+        self.optimizer = tf.keras.optimizers.Adam()
+        self.loss_object = tf.keras.losses.CategoricalCrossentropy(
+            from_logits=True, reduction=tf.keras.losses.Reduction.NONE
+        )
 
-    gradients = tape.gradient(loss, model.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+        self.train_loss = tf.keras.metrics.Mean(name="train_loss")
+        self.train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(
+            name="train_accuracy"
+        )
 
-    train_loss(loss)
-    # tf.print(idxrule)
-    # tf.print(tf.argmax(predictions, -1))
-    train_accuracy(idxrule, predictions)
+        self.checkpoint_path = "./train"
+        self.ckpt = tf.train.Checkpoint(
+            transformer=self.model, optimizer=self.optimizer
+        )
+        self.ckpt_manager = tf.train.CheckpointManager(
+            self.ckpt, self.checkpoint_path, max_to_keep=5
+        )
+        if self.ckpt_manager.latest_checkpoint:
+            self.ckpt.restore(self.ckpt_manager.latest_checkpoint)
+            print("Latest checkpoint restored!!")
 
+    def loss_function(self, real, pred):
+        real = tf.one_hot(real, 50, dtype=tf.float32)
+        loss_ = self.loss_object(real, pred)
+        return tf.reduce_mean(loss_)
 
-traindata = h5py.File("train.h5", "r")
-traindata = (
-    traindata["seq"][()],
-    traindata["idxnon"][()],
-    traindata["pos"][()],
-    traindata["idxrule"][()],
-)
-traindata = tf.data.Dataset.from_tensor_slices(traindata)
-traindata = traindata.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+    @tf.function(
+        input_signature=[
+            tf.TensorSpec(shape=(None, 7500), dtype=tf.int32),
+            tf.TensorSpec(shape=(None,), dtype=tf.int32),
+            tf.TensorSpec(shape=(None,), dtype=tf.int32),
+            tf.TensorSpec(shape=(None,), dtype=tf.int32),
+        ]
+    )
+    def train_step(self, x, idxnon, pos, idxrule):
+        mask1, mask_del = create_masks(x, idxnon)
 
-for epoch in range(EPOCHS):
-    start = time.time()
+        with tf.GradientTape() as tape:
+            predictions = self.model(x, idxnon, pos, True, mask1, mask_del)
+            loss = self.loss_function(idxrule, predictions)
 
-    train_loss.reset_states()
-    train_accuracy.reset_states()
+        gradients = tape.gradient(loss, self.model.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
 
-    # inp -> portuguese, tar -> english
-    for (batch, (x, idxnon, pos, idxrule)) in enumerate(traindata):
-        train_step(x, idxnon, pos, idxrule)
+        self.train_loss(loss)
+        self.train_accuracy(idxrule, predictions)
+        # tf.print(idxrule, summarize=-1)
 
-        if batch % 1 == 0:
+    def loaddata(self):
+        traindata = h5py.File("train.h5", "r")
+        traindata = (
+            traindata["seq"][()],
+            traindata["idxnon"][()],
+            traindata["pos"][()],
+            traindata["idxrule"][()],
+        )
+        # traindata = (
+        #     traindata["seq"][:12],
+        #     traindata["idxnon"][:12],
+        #     traindata["pos"][:12],
+        #     traindata["idxrule"][:12],
+        # )
+        traindata = tf.data.Dataset.from_tensor_slices(traindata)
+        self.traindata = traindata.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+
+    def train(self):
+        for epoch in range(EPOCHS):
+            start = time.time()
+
+            self.train_loss.reset_states()
+            self.train_accuracy.reset_states()
+
+            # inp -> portuguese, tar -> english
+            for (batch, (x, idxnon, pos, idxrule)) in enumerate(self.traindata):
+                self.train_step(x, idxnon, pos, idxrule)
+
+                if batch % 1 == 0:
+                    print(
+                        "Epoch {} Batch {} Loss {:.4f} Accuracy {:.4f}".format(
+                            epoch + 1,
+                            batch,
+                            self.train_loss.result(),
+                            self.train_accuracy.result(),
+                        )
+                    )
+
+            ckpt_save_path = self.ckpt_manager.save()
             print(
-                "Epoch {} Batch {} Loss {:.4f} Accuracy {:.4f}".format(
-                    epoch + 1, batch, train_loss.result(), train_accuracy.result()
+                "Saving checkpoint for epoch {} at {}".format(epoch + 1, ckpt_save_path)
+            )
+
+            print(
+                "Epoch {} Loss {:.4f} Accuracy {:.4f}".format(
+                    epoch + 1, self.train_loss.result(), self.train_accuracy.result()
                 )
             )
 
-    ckpt_save_path = ckpt_manager.save()
-    print("Saving checkpoint for epoch {} at {}".format(epoch + 1, ckpt_save_path))
+            print("Time taken for 1 epoch: {} secs\n".format(time.time() - start))
 
-    print(
-        "Epoch {} Loss {:.4f} Accuracy {:.4f}".format(
-            epoch + 1, train_loss.result(), train_accuracy.result()
-        )
-    )
 
-    print("Time taken for 1 epoch: {} secs\n".format(time.time() - start))
-
+if __name__ == "__main__":
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    network = SygusNetwork()
+    network.loaddata()
+    network.train()
