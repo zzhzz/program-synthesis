@@ -28,6 +28,9 @@ from collections import deque, defaultdict
 
 import sygusmap
 import sygusdata
+import gentraindata
+import sygusmodel
+
 
 class SygusSolver:
 
@@ -50,12 +53,14 @@ class SygusSolver:
         ("ite", (SortValue.Bool, SortValue.Bool, SortValue.Bool), SortValue.Bool),
     ]
 
-    def __init__(self):
+    def __init__(self, neural=None):
         self.sort_table = {}
         self.internals = {}
         self.local_envs = []
         self.add_internals()
         self.expand_stack = []
+
+        self.neural = neural
 
     def add_internals(self):
         for name, params, sort in SygusSolver.INTERNALS:
@@ -187,9 +192,9 @@ class SygusSolver:
 
     def decide(self):
         expandfirst = None
-        if self.filename.startswith('max'):
+        if self.filename.startswith("max"):
             num = self.filename[3:-3]
-            if num[0] == '_':
+            if num[0] == "_":
                 num = num[1:]
             num = int(num)
 
@@ -218,7 +223,7 @@ class SygusSolver:
                 self.expand_stack.append(old[:1] + old[2:])
                 self.expand_stack.append(old[1:])
                 self.curstatus = 0
-        elif self.filename.startswith('array_search'):
+        elif self.filename.startswith("array_search"):
             num = self.filename[13:-3]
             num = int(num)
             if isinstance(self.expand_stack, list):
@@ -243,56 +248,94 @@ class SygusSolver:
             if len(self.expand_stack) == 0:
                 enumlist = []
                 for i in range(6):
-                    enumlist = enumlist + ["ite", "="] + ["+", "psi0"] * 9 + ["psi0", str(i*10), str(i*10)]
-                enumlist = enumlist + ["psi0" ]
+                    enumlist = (
+                        enumlist
+                        + ["ite", "="]
+                        + ["+", "psi0"] * 9
+                        + ["psi0", str(i * 10), str(i * 10)]
+                    )
+                enumlist = enumlist + ["psi0"]
                 self.expand_stack = enumlist
             expandfirst = self.expand_stack[0]
             self.expand_stack = self.expand_stack[1:]
         elif self.filename == "s2.sl":
             if len(self.expand_stack) == 0:
-                self.expand_stack = ['ite', '=', 'psi0', 'psi1', '0', 'ite', '>=', 'psi0', 'psi1', '1', '-1']
+                self.expand_stack = [
+                    "ite",
+                    "=",
+                    "psi0",
+                    "psi1",
+                    "0",
+                    "ite",
+                    ">=",
+                    "psi0",
+                    "psi1",
+                    "1",
+                    "-1",
+                ]
             expandfirst = self.expand_stack[0]
             self.expand_stack = self.expand_stack[1:]
         elif self.filename == "s3.sl":
             if len(self.expand_stack) == 0:
-                self.expand_stack = ['ite', '=', 'psi0', 'psi1', '+', 'psi0', 'psi1', 'ite', '>=', 'psi0', 'psi1', '1', '-1']
+                self.expand_stack = [
+                    "ite",
+                    "=",
+                    "psi0",
+                    "psi1",
+                    "+",
+                    "psi0",
+                    "psi1",
+                    "ite",
+                    ">=",
+                    "psi0",
+                    "psi1",
+                    "1",
+                    "-1",
+                ]
             expandfirst = self.expand_stack[0]
             self.expand_stack = self.expand_stack[1:]
         elif self.filename == "three.sl":
             if len(self.expand_stack) == 0:
-                self.expand_stack = ['mod', '*', '3', 'psi0', '10']
+                self.expand_stack = ["mod", "*", "3", "psi0", "10"]
             expandfirst = self.expand_stack[0]
             self.expand_stack = self.expand_stack[1:]
         elif self.filename == "tutorial.sl":
             if len(self.expand_stack) == 0:
-                self.expand_stack = ['*', '+', 'psi0', 'psi0', '-', 'psi1', 'psi2']
+                self.expand_stack = ["*", "+", "psi0", "psi0", "-", "psi1", "psi2"]
             expandfirst = self.expand_stack[0]
             self.expand_stack = self.expand_stack[1:]
         return expandfirst
-
 
     def expand_left(self, cur_p, expr):
         for i, child in enumerate(expr):
             if child in self.synth_rules:
                 results = self.synth_rules[child]
-                expandfirst = self.decide()
-                if expandfirst is None:
-                    return [expr[:i] + result + expr[i + 1 :] for result in results]
+
+                if self.neural is not None:
+                    k = -1
+                    for a, (s, _) in enumerate(self.list_synths):
+                        if s == child:
+                            k = a
+                            break
+                    assert k != -1
+
+                    input_np, idxnon, pos = gentraindata.gendata(
+                        self.list_synths,
+                        self.list_constraints,
+                        sygusmap.apply_to_list(expr),
+                        i,
+                        k,
+                    )
+                    predictions = self.neural.forward(input_np, idxnon, pos)
+                    return [
+                        (cur_p * new_p, expr[:i] + result + expr[i + 1 :])
+                        for new_p, result in zip(predictions, results)
+                    ]
                 else:
-                    for j, result in enumerate(results):
-                        if expandfirst in result:
-                            k = -1
-                            for a, (s, _) in enumerate(self.list_synths):
-                                if s == child:
-                                    k = a
-                                    break
-                            assert k != -1
-                            if len(expr) < 1000:
-                                sygusdata.write((self.list_synths, self.list_constraints, sygusmap.apply_to_list(expr), i, k, j))
-                            return [expr[:i] + result + expr[i + 1 :]]
-                    newresults = [expr[:i] + result + expr[i + 1 :] for result in results if expandfirst in result]
-                    assert len(newresults) == 1
-                    return newresults or [expr[:i] + result + expr[i + 1 :] for result in results]
+                    return [
+                        (cur_p * 0.9, expr[:i] + result + expr[i + 1 :])
+                        for result in results
+                    ]
 
         return None
 
@@ -356,7 +399,12 @@ class SygusSolver:
         self.list_constraints = []
 
         for rule in synthcmd.rules:
-            self.list_synths.append((rule.name, [sygusmap.apply_to_list(expr.to_list()) for expr in rule.exprs]))
+            self.list_synths.append(
+                (
+                    rule.name,
+                    [sygusmap.apply_to_list(expr.to_list()) for expr in rule.exprs],
+                )
+            )
 
         constraint_combine = None
         for constraint in self.constraints:
@@ -385,8 +433,8 @@ class SygusSolver:
                 if self.check_valid(cur_expr):
                     return True
             else:
-                expand_queue.extend(new_exprs)
-
+                for new_expr in new_exprs:
+                    heapq.heappush(expand_queue, new_expr)
 
         print("(failed)")
         return None

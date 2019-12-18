@@ -299,6 +299,16 @@ class SygusNetwork:
         traindata = tf.data.Dataset.from_tensor_slices(traindata)
         self.traindata = traindata.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 
+    def forward(self, x, idxnon, pos):
+        x = tf.expand_dims(tf.Tensor(x), 0)
+        idxnon = tf.expand_dims(tf.Tensor(idxnon), 0)
+        pos = tf.expand_dims(tf.Tensor(pos), 0)
+
+        mask1, mask_del = create_masks(x, idxnon)
+        predictions = self.model(x, idxnon, pos, False, mask1, mask_del)
+        predictions = tf.nn.softmax(predictions, -1)
+        return tf.squeeze(predictions, 0).numpy()
+
     def train(self):
         for epoch in range(EPOCHS):
             start = time.time()

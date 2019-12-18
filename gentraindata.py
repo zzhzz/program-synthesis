@@ -19,7 +19,7 @@ def pad_to_len(m, l):
         result[len(m) :] = 0
         return result
 
-def gendata(list_synths, list_constraints, expr, pos, idxnon, idxrule):
+def gendata(list_synths, list_constraints, expr, pos, idxnon, idxrule=None):
     list_synths_np = []
     for non, rules in list_synths:
         rules = np.stack([pad_to_len(rule, 10) for rule in rules], axis=0)
@@ -40,7 +40,10 @@ def gendata(list_synths, list_constraints, expr, pos, idxnon, idxrule):
         [list_synths_np, list_constraints_np, expr_np], axis=0
     )
 
-    return input_np, np.array(idxnon, dtype=np.int32), np.array(pos, dtype=np.int32), np.array(idxrule, dtype=np.int32)
+    if idxrule:
+        return input_np, np.array(idxnon, dtype=np.int32), np.array(pos, dtype=np.int32), np.array(idxrule, dtype=np.int32)
+    else:
+        return input_np, np.array(idxnon, dtype=np.int32), np.array(pos, dtype=np.int32)
 
 def main():
     files = os.listdir("/home/wenjie/sygusdata")
