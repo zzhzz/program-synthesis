@@ -326,16 +326,31 @@ class SygusSolver:
                         i,
                         k,
                     )
+                    print('run neuralnetwork')
                     predictions = self.neural.forward(input_np, idxnon, pos)
-                    return [
+                    result = [
                         (cur_p * new_p, expr[:i] + result + expr[i + 1 :])
                         for new_p, result in zip(predictions, results)
                     ]
+                    # heapq.heapify(result)
+                    r1, r2 = [], []
+                    for curp, cure in result:
+                        has = False
+                        for curechild in cure:
+                            if curechild in self.synth_rules:
+                                has = True
+                                break
+                        if has:
+                            r2.append((curp, cure))
+                        else:
+                            r1.append((curp, cure))
+                    return r1, r2
+                    # return result, []
                 else:
                     return [
                         (cur_p * 0.9, expr[:i] + result + expr[i + 1 :])
                         for result in results
-                    ]
+                    ], []
 
         return None
 
@@ -360,26 +375,28 @@ class SygusSolver:
         )
         if back:
             expr = [(self.rename_back[s] if s in self.rename_back else s) for s in expr]
+        if back:
+            name = self.rename_back[name]
         return f"(define-fun {name} ({params_str}) {self.synthcmd.sort} {self.list_expr_to_string(expr)})"
 
     def check_valid(self, expr):
-        # cmd_define_func = self.expr_to_define_cmd(expr)
-        # cmd_check = "(check-sat)"
-        # all_cmds = (
-        #     self.cmd_declears_str
-        #     + [cmd_define_func]
-        #     + [self.constraint_combine_str]
-        #     + [cmd_check]
-        # )
-        # all_cmds = "\n".join(all_cmds)
+        cmd_define_func = self.expr_to_define_cmd(expr)
+        cmd_check = "(check-sat)"
+        all_cmds = (
+            self.cmd_declears_str
+            + [cmd_define_func]
+            + [self.constraint_combine_str]
+            + [cmd_check]
+        )
+        all_cmds = "\n".join(all_cmds)
         # print(all_cmds)
         # print()
-        # all_cmds = z3.parse_smt2_string(all_cmds)
-        # solver = z3.Solver()
-        # if solver.check(all_cmds) == z3.unsat:
-        if True:
+        all_cmds = z3.parse_smt2_string(all_cmds)
+        solver = z3.Solver()
+        if solver.check(all_cmds) == z3.unsat:
             print(self.expr_to_define_cmd(expr, True))
             return True
+        print('failed', self.expr_to_define_cmd(expr, True))
         return False
 
     def check_synth(self):
@@ -421,20 +438,27 @@ class SygusSolver:
         self.cmd_declears_str = [str(f) for f in self.decls_rename.values()]
 
         expand_queue = []
+        expand_queue2 = []
         heapq.heappush(expand_queue, (-1, ["Start"]))
         # expand_queue.append(["Start"])
 
-        while len(expand_queue) > 0:
+        while len(expand_queue) > 0 or len(expand_queue2) > 0:
             # cur_expr = expand_queue.popleft()
-            cur_p, cur_expr = heapq.heappop()
+            if len(expand_queue) > 0:
+                cur_p, cur_expr = heapq.heappop(expand_queue)
+            else:
+                cur_p, cur_expr = heapq.heappop(expand_queue2)
             new_exprs = self.expand_left(cur_p, cur_expr)
             # print(cur_exprs)
             if new_exprs is None:
                 if self.check_valid(cur_expr):
                     return True
             else:
-                for new_expr in new_exprs:
+                in1, in2 = new_exprs
+                for new_expr in in1:
                     heapq.heappush(expand_queue, new_expr)
+                for new_expr in in2:
+                    heapq.heappush(expand_queue2, new_expr)
 
         print("(failed)")
         return None

@@ -300,9 +300,9 @@ class SygusNetwork:
         self.traindata = traindata.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 
     def forward(self, x, idxnon, pos):
-        x = tf.expand_dims(tf.Tensor(x), 0)
-        idxnon = tf.expand_dims(tf.Tensor(idxnon), 0)
-        pos = tf.expand_dims(tf.Tensor(pos), 0)
+        x = tf.expand_dims(tf.convert_to_tensor(x), 0)
+        idxnon = tf.expand_dims(tf.convert_to_tensor(idxnon), 0)
+        pos = tf.expand_dims(tf.convert_to_tensor(pos), 0)
 
         mask1, mask_del = create_masks(x, idxnon)
         predictions = self.model(x, idxnon, pos, False, mask1, mask_del)
