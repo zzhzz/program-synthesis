@@ -4,6 +4,7 @@ import time
 import os
 import h5py
 
+import sys
 
 def scaled_dot_product_attention(q, k, v, mask):
     """Calculate the attention weights.
@@ -253,7 +254,7 @@ class SygusNetwork:
         )
         if self.ckpt_manager.latest_checkpoint:
             self.ckpt.restore(self.ckpt_manager.latest_checkpoint)
-            print("Latest checkpoint restored!!")
+            print(self.ckpt_manager.latest_checkpoint, "Latest checkpoint restored!!", file=sys.stderr)
 
     def loss_function(self, real, pred):
         real = tf.one_hot(real, 50, dtype=tf.float32)

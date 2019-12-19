@@ -326,7 +326,7 @@ class SygusSolver:
                         i,
                         k,
                     )
-                    print('run neuralnetwork')
+                    # print('run neuralnetwork')
                     predictions = self.neural.forward(input_np, idxnon, pos)
                     result = [
                         (cur_p * new_p, expr[:i] + result + expr[i + 1 :])
@@ -396,7 +396,7 @@ class SygusSolver:
         if solver.check(all_cmds) == z3.unsat:
             print(self.expr_to_define_cmd(expr, True))
             return True
-        print('failed', self.expr_to_define_cmd(expr, True))
+        # print('failed', self.expr_to_define_cmd(expr, True))
         return False
 
     def check_synth(self):
