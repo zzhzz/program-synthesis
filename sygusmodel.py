@@ -249,12 +249,13 @@ class SygusNetwork:
         self.ckpt = tf.train.Checkpoint(
             transformer=self.model, optimizer=self.optimizer
         )
-        self.ckpt_manager = tf.train.CheckpointManager(
-            self.ckpt, self.checkpoint_path, max_to_keep=5
-        )
-        if self.ckpt_manager.latest_checkpoint:
-            self.ckpt.restore(self.ckpt_manager.latest_checkpoint)
-            print(self.ckpt_manager.latest_checkpoint, "Latest checkpoint restored!!", file=sys.stderr)
+        self.ckpt.restore('train/ckpt-96')
+        # self.ckpt_manager = tf.train.CheckpointManager(
+        #     self.ckpt, self.checkpoint_path, max_to_keep=5
+        # )
+        # if self.ckpt_manager.latest_checkpoint:
+        #     self.ckpt.restore(self.ckpt_manager.latest_checkpoint)
+        #     print(self.ckpt_manager.latest_checkpoint, "Latest checkpoint restored!!", file=sys.stderr)
 
     def loss_function(self, real, pred):
         real = tf.one_hot(real, 50, dtype=tf.float32)
