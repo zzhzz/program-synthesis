@@ -249,7 +249,7 @@ class SygusNetwork:
         self.ckpt = tf.train.Checkpoint(
             transformer=self.model, optimizer=self.optimizer
         )
-        self.ckpt.restore('train/ckpt-96')
+        self.ckpt.restore(sys.argv[2] + '/train/ckpt-96')
         # self.ckpt_manager = tf.train.CheckpointManager(
         #     self.ckpt, self.checkpoint_path, max_to_keep=5
         # )
