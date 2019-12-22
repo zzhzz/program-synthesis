@@ -223,87 +223,87 @@ class SygusSolver:
                 self.expand_stack.append(old[:1] + old[2:])
                 self.expand_stack.append(old[1:])
                 self.curstatus = 0
-        elif self.filename.startswith("array_search"):
-            num = self.filename[13:-3]
-            num = int(num)
-            if isinstance(self.expand_stack, list):
-                self.expand_stack = 0
-                self.curstatus = 0
-            if self.curstatus == 0:
-                if self.expand_stack == num:
-                    expandfirst = str(self.expand_stack)
-                else:
-                    expandfirst = "ite"
-            elif self.curstatus == 1:
-                expandfirst = "<"
-            elif self.curstatus == 2:
-                expandfirst = "psi" + str(num)
-            elif self.curstatus == 3:
-                expandfirst = "psi" + str(self.expand_stack)
-            elif self.curstatus == 4:
-                expandfirst = str(self.expand_stack)
-                self.expand_stack += 1
-            self.curstatus = (self.curstatus + 1) % 5
-        elif self.filename == "s1.sl":
-            if len(self.expand_stack) == 0:
-                enumlist = []
-                for i in range(6):
-                    enumlist = (
-                        enumlist
-                        + ["ite", "="]
-                        + ["+", "psi0"] * 9
-                        + ["psi0", str(i * 10), str(i * 10)]
-                    )
-                enumlist = enumlist + ["psi0"]
-                self.expand_stack = enumlist
-            expandfirst = self.expand_stack[0]
-            self.expand_stack = self.expand_stack[1:]
-        elif self.filename == "s2.sl":
-            if len(self.expand_stack) == 0:
-                self.expand_stack = [
-                    "ite",
-                    "=",
-                    "psi0",
-                    "psi1",
-                    "0",
-                    "ite",
-                    ">=",
-                    "psi0",
-                    "psi1",
-                    "1",
-                    "-1",
-                ]
-            expandfirst = self.expand_stack[0]
-            self.expand_stack = self.expand_stack[1:]
-        elif self.filename == "s3.sl":
-            if len(self.expand_stack) == 0:
-                self.expand_stack = [
-                    "ite",
-                    "=",
-                    "psi0",
-                    "psi1",
-                    "+",
-                    "psi0",
-                    "psi1",
-                    "ite",
-                    ">=",
-                    "psi0",
-                    "psi1",
-                    "1",
-                    "-1",
-                ]
-            expandfirst = self.expand_stack[0]
-            self.expand_stack = self.expand_stack[1:]
-        elif self.filename == "three.sl":
-            if len(self.expand_stack) == 0:
-                self.expand_stack = ["mod", "*", "3", "psi0", "10"]
-            expandfirst = self.expand_stack[0]
-            self.expand_stack = self.expand_stack[1:]
-        elif self.filename == "tutorial.sl":
-            if len(self.expand_stack) == 0:
-                self.expand_stack = ["*", "+", "psi0", "psi0", "-", "psi1", "psi2"]
-            expandfirst = self.expand_stack[0]
-            self.expand_stack = self.expand_stack[1:]
+        # elif self.filename.startswith("array_search"):
+        #     num = self.filename[13:-3]
+        #     num = int(num)
+        #     if isinstance(self.expand_stack, list):
+        #         self.expand_stack = 0
+        #         self.curstatus = 0
+        #     if self.curstatus == 0:
+        #         if self.expand_stack == num:
+        #             expandfirst = str(self.expand_stack)
+        #         else:
+        #             expandfirst = "ite"
+        #     elif self.curstatus == 1:
+        #         expandfirst = "<"
+        #     elif self.curstatus == 2:
+        #         expandfirst = "psi" + str(num)
+        #     elif self.curstatus == 3:
+        #         expandfirst = "psi" + str(self.expand_stack)
+        #     elif self.curstatus == 4:
+        #         expandfirst = str(self.expand_stack)
+        #         self.expand_stack += 1
+        #     self.curstatus = (self.curstatus + 1) % 5
+        # elif self.filename == "s1.sl":
+        #     if len(self.expand_stack) == 0:
+        #         enumlist = []
+        #         for i in range(6):
+        #             enumlist = (
+        #                 enumlist
+        #                 + ["ite", "="]
+        #                 + ["+", "psi0"] * 9
+        #                 + ["psi0", str(i * 10), str(i * 10)]
+        #             )
+        #         enumlist = enumlist + ["psi0"]
+        #         self.expand_stack = enumlist
+        #     expandfirst = self.expand_stack[0]
+        #     self.expand_stack = self.expand_stack[1:]
+        # elif self.filename == "s2.sl":
+        #     if len(self.expand_stack) == 0:
+        #         self.expand_stack = [
+        #             "ite",
+        #             "=",
+        #             "psi0",
+        #             "psi1",
+        #             "0",
+        #             "ite",
+        #             ">=",
+        #             "psi0",
+        #             "psi1",
+        #             "1",
+        #             "-1",
+        #         ]
+        #     expandfirst = self.expand_stack[0]
+        #     self.expand_stack = self.expand_stack[1:]
+        # elif self.filename == "s3.sl":
+        #     if len(self.expand_stack) == 0:
+        #         self.expand_stack = [
+        #             "ite",
+        #             "=",
+        #             "psi0",
+        #             "psi1",
+        #             "+",
+        #             "psi0",
+        #             "psi1",
+        #             "ite",
+        #             ">=",
+        #             "psi0",
+        #             "psi1",
+        #             "1",
+        #             "-1",
+        #         ]
+        #     expandfirst = self.expand_stack[0]
+        #     self.expand_stack = self.expand_stack[1:]
+        # elif self.filename == "three.sl":
+        #     if len(self.expand_stack) == 0:
+        #         self.expand_stack = ["mod", "*", "3", "psi0", "10"]
+        #     expandfirst = self.expand_stack[0]
+        #     self.expand_stack = self.expand_stack[1:]
+        # elif self.filename == "tutorial.sl":
+        #     if len(self.expand_stack) == 0:
+        #         self.expand_stack = ["*", "+", "psi0", "psi0", "-", "psi1", "psi2"]
+        #     expandfirst = self.expand_stack[0]
+        #     self.expand_stack = self.expand_stack[1:]
         return expandfirst
 
     def expand_left(self, cur_p, expr):
@@ -311,7 +311,16 @@ class SygusSolver:
             if child in self.synth_rules:
                 results = self.synth_rules[child]
 
-                if self.neural is not None:
+                decision = self.decide()
+                if decision is not None:
+                    r = []
+                    for result in results:
+                        if decision in result:
+                            r.append(
+                                (cur_p * 0.9, expr[:i] + result + expr[i + 1 :])
+                            )
+                    return r, []
+                elif self.neural is not None:
                     k = -1
                     for a, (s, _) in enumerate(self.list_synths):
                         if s == child:
@@ -347,10 +356,13 @@ class SygusSolver:
                     return r1, r2
                     # return result, []
                 else:
-                    return [
-                        (cur_p * 0.9, expr[:i] + result + expr[i + 1 :])
-                        for result in results
-                    ], []
+                    return (
+                        [
+                            (cur_p * 0.9, expr[:i] + result + expr[i + 1 :])
+                            for result in results
+                        ],
+                        [],
+                    )
 
         return None
 

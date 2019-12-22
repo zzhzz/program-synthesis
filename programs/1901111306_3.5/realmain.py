@@ -7,7 +7,7 @@ import time
 import sygusmodel
 
 fname = sys.argv[1]
-shortfname = os.path.split(fname)
+_, shortfname = os.path.split(fname)
 
 neural = sygusmodel.SygusNetwork()
 

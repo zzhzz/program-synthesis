@@ -86,7 +86,7 @@ if __name__ == "__main__":
     for studentname in os.listdir(programdir):
         toexe = programdir + "'" + studentname + "'" + "/main.py "
         outfile.write(studentname + ": \n")
-        cmd = "python3"
+        cmd = "python3 "
         i = i + 1
         print(i)
         for testgroup in [hiddentests, opentests]:

@@ -106,9 +106,6 @@ def ReadQuery(bmExpr):
                 spec_smt2.append('(assert %s)'%(toString(constraint[1:])))
             spec_smt2='\n'.join(spec_smt2)
             #print spec_smt2
-            print('#############################')
-            print(spec_smt2)
-            print('#############################')
             spec = parse_smt2_string(spec_smt2,decls=dict(self.VarTable))
             spec = And(spec)
             self.solver.add(Not(spec))
